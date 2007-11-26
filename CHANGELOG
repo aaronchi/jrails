@@ -1,2 +1,7 @@
+0.2.0 (26 Nov 2007)
+* Vastly Improved FX
+* Improved Form Observers
+* Fixed Rails <= 1.2.6 Compatibility
+
 0.1.0 (15 Nov 2007)
 * Initial release

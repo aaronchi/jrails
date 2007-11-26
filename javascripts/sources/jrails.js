@@ -1,94 +1,64 @@
  /*
  *
  * jRails form observer plugin
- * version 0.1
+ * version 0.2
  * <aaron@ennerchi.com> | http://www.ennerchi.com
  * 
  */
 
 (function($) {
-  $.fn.extend({
-    formElementObserver: function(frequency, callback){
-      var field = $(this), lastValue = field.formVal();
-      setInterval(function(){
-        value = field.formVal();
-        if (lastValue != value) callback.apply(this, [field[0], value]);
-        lastValue = value;
-      }, frequency * 1000);
-    },
-    formElementEventObserver: function(callback){
-      var field = $(this), lastValue = field.formVal();
-      event = (field.type == 'radio' || field.type == 'checkbox') ? 'click' : 'change';
-      field.bind(event, function(){
-        value = field.formVal();
-        if (lastValue != value) callback.apply(this, [field[0], value]);
-        lastValue = value;
-      });
-    },
-    formObserver: function(frequency, callback){
-      var form = $(this), lastValue = form.serialize();
-      setInterval(function(){
-        value = form.serialize();
-        if (lastValue != value) callback.apply(this, [form[0], form.serialize()]);
-        lastValue = value;
-      }, frequency * 1000);
-    },
-    formEventObserver: function(callback){
-      var form = $(this);
-      $(form.elements).each(function(){
-        field = $(this);
-        field.attr('lastValue', field.formVal());
-        event = (field.type == 'radio' || field.type == 'checkbox') ? 'click' : 'change';
-        field.bind(event, function(){
-          field = $(this);
-          value = field.formVal();
-          if (field.attr('lastValue') != value) callback.apply(this, [form[0], form.serialize()]);
-          field.attr('lastValue', value);
-        });
-      });
+  $.extend({ // Translate field to event
+    fieldEvent: function(el, obs) {
+      var field = el[0] || el;
+      if (field.type == 'radio' || field.type == 'checkbox') event = 'click';
+      else if (obs && field.type == 'text' || field.type == 'textarea') event = 'keyup';
+      else event = 'change';
+      return event;
     }
   });
-})(jQuery);
-
-//gets the value of the first matched form field, or sets
-//the value of all the matched form fields
-(function($) {
-  $.fn.extend({
-    formVal: function(newVal) {
-    var self = this.get(0);
-    var optVal = function(opt) {
-        if(opt.value) return opt.value; // non-empty string, use it
-        if(!opt.outerHTML) return ''; // not IE, we should trust value
-        return /\svalue=""(?:\s|>)/.test(opt.outerHTML) ? '' : opt.text;
-    };
-    if(newVal == null) {
-        if(this.size() < 1) return '';
-        if(self.type == 'text') return self.value;
-        if(self.tagName == 'TEXTAREA') return this.text();
-        if(self.type == 'checkbox' || self.type == 'radio')
-          return this.filter('input:checked').val() || '';
-        if(self.tagName == 'OPTION') return this.parent().formVal();
-        if(self.tagName == 'SELECT' && self.selectedIndex >= 0)
-          return optVal(self.options[self.selectedIndex]);
-        return '';
-    }
-    if(self.type == 'text') this.val(newVal);
-    else if(self.tagName == 'TEXTAREA') this.text(newVal);
-    else if(self.type == 'checkbox' || self.type == 'radio') {
-        this.filter(':checked').removeAttr('checked');
-        this.filter('[@value=' + newVal + ']').attr('checked', 'checked');
-    }
-    else if(self.tagName == 'OPTION') this.parent().formVal(newVal);
-    else if(self.tagName == 'SELECT') {
-        for (var i=0, l=self.options.length; i<l; ++i) {
-            if(newVal == optVal(self.options[i])) {
-                self.selectedIndex = i;
-                break;
-            }
+  $.fn.extend({ // Delayed observer for fields and forms
+    delayedObserver: function(delay, callback){
+      var el = $(this);
+      if (typeof window.delayedObserverStack == 'undefined') window.delayedObserverStack = [];
+      if (typeof window.delayedObserverCallback == 'undefined') {
+        window.delayedObserverCallback = function(stackPos) {
+          observed = window.delayedObserverStack[stackPos];
+          if (observed.timer) clearTimeout(observed.timer);   
+          observed.timer = setTimeout(function(){
+            observed.timer = null;
+            observed.callback(observed.obj, observed.obj.formVal());
+          }, observed.delay * 1000);
+          observed.oldVal = observed.obj.formVal();
         }
+      }
+      window.delayedObserverStack.push({
+        obj: el, timer: null, delay: delay, 
+        oldVal: el.formVal(), callback: callback
+      });     
+      var stackPos = window.delayedObserverStack.length-1;
+      if (el[0].tagName == 'FORM') {
+        $(':input', el).each(function(){
+          var field = $(this);
+          field.bind($.fieldEvent(field, delay), function(){
+            observed = window.delayedObserverStack[stackPos];
+            if (observed.obj.formVal() == observed.obj.oldVal) return;
+            else window.delayedObserverCallback(stackPos);
+          });
+        });
+      } else {
+        el.bind($.fieldEvent(el, delay), function(){
+          observed = window.delayedObserverStack[stackPos];
+          if (observed.obj.formVal() == observed.obj.oldVal) return;
+          else window.delayedObserverCallback(stackPos);
+        });
+      };
+    },
+    formVal: function() { // Gets form values
+      var el = this[0];
+      if(el.tagName == 'FORM') return this.serialize();
+      if(el.type == 'checkbox' || self.type == 'radio') return this.filter('input:checked').val() || '';
+      else return this.val();
     }
-    return this;
-}
   });
 })(jQuery);
 
@@ -126,11 +96,19 @@
       return this;
     },
     DropIn : function(speed, callback) {
-      this.show({ method: 'drop', direction: 'down' }, speed, callback); 
+      this.show({ method: 'drop', direction: 'up' }, speed, callback); 
       return this;
     },
     Fade : function(speed, callback) {
       return this.fadeOut(speed, callback);
+    },
+    Fold : function(speed, callback) {
+      this.hide({ method: 'fold' }, speed, callback); 
+      return this;
+    },
+    FoldOut : function(speed, callback) {
+      this.show({ method: 'fold' }, speed, callback); 
+      return this;
     },
     Grow : function(speed, callback) {
       this.show({ method: 'scale' }, speed, callback); 
@@ -141,7 +119,7 @@
       return this;
     },
     Puff : function(speed, callback) {
-      this.hide({ method: 'scale', mode: 'puff' }, speed, callback); 
+      this.hide({ method: 'puff' }, speed, callback); 
       return this;
     },
     Pulsate : function(speed, callback) {
@@ -157,7 +135,7 @@
       return this;
     },
     Squish : function(speed, callback) {
-      this.hide({ method: 'scale', mode: 'squish' }, speed, callback); 
+      this.hide({ method: 'scale', origin: ['top', 'left'] }, speed, callback); 
       return this;
     },
     SlideUp : function(speed, callback) {
@@ -165,7 +143,15 @@
       return this;
     },
     SlideDown : function(speed, callback) {
-      this.show({ method: 'slide', direction: 'down'}, speed, callback); 
+      this.show({ method: 'slide', direction: 'up'}, speed, callback); 
+      return this;
+    },
+    SwitchOff : function(speed, callback) {
+      this.hide({ method: 'clip'}, speed, callback); 
+      return this;
+    },
+    SwitchOn : function(speed, callback) {
+      this.show({ method: 'clip'}, speed, callback); 
       return this;
     }
   });

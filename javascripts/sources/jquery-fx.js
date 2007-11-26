@@ -1,30 +1,61 @@
 (function($) {
 
-  $.fx = $.fx || {}; //Add the 'fx' scope
+  $.ec = $.ec || {}; //Add the 'ec' scope
 
-  /*
-   * Public methods (jQuery FX scope)
-   */
-
-  $.extend($.fx, {
-    relativize: function(el) {
-      if(!el.css("position") || !el.css("position").match(/fixed|absolute|relative/)) el.css("position", "relative"); //Relativize
-    },
+  $.extend($.ec, {
     save: function(el, set) {
       for(var i=0;i<set.length;i++) {
-        if(set[i] !== null) $.data(el[0], "fx.storage."+set[i], el.css(set[i]));  
+        if(set[i] !== null) $.data(el[0], "ec.storage."+set[i], el.css(set[i]));  
       }
     },
-    restore: function(el, set, ret) {
-      if(ret) var obj = {};
+    restore: function(el, set) {
       for(var i=0;i<set.length;i++) {
-        if(ret) obj[set[i]] = $.data(el[0], "fx.storage."+set[i]);
-        if(set[i] !== null && !ret) el.css(set[i], $.data(el[0], "fx.storage."+set[i]));  
+       if (name == 'size') alert(set[i] + ' ' + $.data(el[0], "ec.storage."+set[i]));
+        if(set[i] !== null) el.css(set[i], $.data(el[0], "ec.storage."+set[i]));  
       }
-      if(ret) return obj;
     },
-    findSides: function(el) { //Very nifty function (especially for IE!)
-      return [ !!parseInt(el.css("left")) ? "left" : "right", !!parseInt(el.css("top")) ? "top" : "bottom" ];
+    getBaseline: function(origin, original) { // Translates a [top,left] array into a baseline value
+      // this should be a little more flexible in the future to handle a string & hash
+      var y, x;
+      switch (origin[0]) {
+        case 'top': y = 0; break;
+        case 'middle': y = 0.5; break;
+        case 'bottom': y = 1; break;
+        default: y = origin[0] / original.height;
+      };
+      switch (origin[1]) {
+        case 'left': x = 0; break;
+        case 'center': x = 0.5; break;
+        case 'right': x = 1; break;
+        default: x = origin[1] / original.width;
+      };
+     return {x: x, y: y};
+    },
+    createWrapper: function(el) {
+      var props = {width: el.outerWidth({margin:true}), height: el.outerHeight({margin:true}), float: el.css('float')};
+      el.wrap('<div id="fxWrapper"></div>');
+      var wrapper = el.parent();
+      if (el.css('position') == 'static'){
+        wrapper.css({position: 'relative'});
+        el.css({position: 'relative'});
+      } else {
+        wrapper.css({position: el.css('position'), top: parseInt(el.css('top')) || null, left: parseInt(el.css('left')) || null, bottom: parseInt(el.css('bottom')) || null, right: parseInt(el.css('right')) || null});
+        wrapper.show();
+        el.css({position: 'relative', top:0, left:0});
+      }
+      wrapper.css(props);
+      return wrapper;
+    },
+    removeWrapper: function(el) {
+      return el.parent().replaceWith(el);
+    },
+    setTransition: function(el, list, factor, val) {
+      val = val || {};
+      $.each(list,function(i, x){
+        unit = el.cssUnit(x);
+        if (unit[0] > 0) val[x] = unit[0] * factor + unit[1];
+      });
+      return val;
     },
     animateClass: function(value, duration, easing, callback) {
   
@@ -63,304 +94,195 @@
       });
     }
   });
-  
+ 
   //Extend the methods of jQuery
   $.fn.extend({
-    effect: function(fx,o) { if($.fx[fx]) this.each(function() { $.fx[fx].apply(this, [o]); }); }, //This just forwards single used effects
+    //Save old methods
     _show: $.fn.show,
     _hide: $.fn.hide,
+    _toggle: $.fn.toggle,
     _addClass: $.fn.addClass,
     _removeClass: $.fn.removeClass,
     _toggleClass: $.fn.toggleClass,
-    show: function(obj,speed,callback){
-      return typeof obj == 'string' || typeof obj == 'undefined' ? this._show(obj, speed) : $.fx[obj.method].apply(this, ['show',obj,speed,callback]);
+    // New ec methods
+    effect: function(fx,o,speed,callback) { 
+      if($.ec[fx]) {
+        var elem = this.get(0);
+        elem.fx = elem.fx || {};
+        if (!elem.fx[fx]) { // Prevent double-click
+          elem.fx[fx] = true;
+          return $.ec[fx].apply(this, [{method: fx, options: o || {}, speed: speed, callback: function(){if (callback) callback.apply(this.arguments); elem.fx[fx] = null;} }]);
+        }
+      }
     },
-    
+    show: function(obj,speed,callback){
+      if (typeof obj == 'string' || typeof obj == 'undefined')
+        return this._show(obj, speed);
+      else {
+        obj['mode'] = 'show';
+        return this.effect(obj.method, obj, speed, callback);
+      };
+    },
     hide: function(obj,speed,callback){
-      return typeof obj == 'string' || typeof obj == 'undefined' ? this._hide(obj, speed) : $.fx[obj.method].apply(this, ['hide',obj,speed,callback]);
+      if (typeof obj == 'string' || typeof obj == 'undefined')
+        return this._hide(obj, speed);
+      else {
+        obj['mode'] = 'hide';
+        return this.effect(obj.method, obj, speed, callback);
+      };
+    },
+    toggle: function(obj,speed,callback){
+      return this.each(function() {
+        var $this = $(this);
+        $this.is(':hidden') ? $this.show(obj,speed,callback) : $this.hide(obj,speed,callback);
+      });
     },
     addClass: function(classNames,speed,easing,callback) {
-      return speed ? $.fx.animateClass.apply(this, [{ add: classNames },speed,easing,callback]) : this._addClass(classNames);
+      return speed ? $.ec.animateClass.apply(this, [{ add: classNames },speed,easing,callback]) : this._addClass(classNames);
     },
     removeClass: function(classNames,speed,easing,callback) {
-      return speed ? $.fx.animateClass.apply(this, [{ remove: classNames },speed,easing,callback]) : this._removeClass(classNames);
+      return speed ? $.ec.animateClass.apply(this, [{ remove: classNames },speed,easing,callback]) : this._removeClass(classNames);
     },
     toggleClass: function(classNames,speed,easing,callback) {
-      return speed ? $.fx.animateClass.apply(this, [{ toggle: classNames },speed,easing,callback]) : this._toggleClass(classNames);
+      return speed ? $.ec.animateClass.apply(this, [{ toggle: classNames },speed,easing,callback]) : this._toggleClass(classNames);
     },
     morph: function(remove,add,speed,easing,callback) {
-      return $.fx.animateClass.apply(this, [{ add: add, remove: remove },speed,easing,callback]);
+      return $.ec.animateClass.apply(this, [{ add: add, remove: remove },speed,easing,callback]);
     },
-    switchClass: function() { this.morph.apply(this, arguments); }
+    switchClass: function() { 
+      this.morph.apply(this, arguments);
+    },
+    // helper functions
+    cssUnit: function(key) { 
+      var style = this.css(key), val = [];
+      $.each( ['em','px','%','pt'], function(i, unit){
+      if(style.indexOf(unit) > 0)
+        val = [parseFloat(style), unit];
+      });
+      return val
+    }
   });
   
 })(jQuery);
 
-(function($) {
-  
-  $.fx.blind = function(type, set, speed, callback) {
+/* Copyright (c) 2007 Paul Bakaus (paul.bakaus@googlemail.com) and Brandon Aaron (brandon.aaron@gmail.com || http://brandonaaron.net)
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+ * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+ *
+ * $LastChangedDate: 2007-11-14 13:20:00 -0700 (Wed, 14 Nov 2007) $
+ * $Rev: 3824 $
+ *
+ * Version: @VERSION
+ *
+ * Requires: jQuery 1.2+
+ */
 
-    this.each(function() {
-
-      var cur = $(this).show(); $.fx.relativize(cur);
-      var modifier = set.direction != "vertical" ? "width" : "height"; //Use the right modifier (width/height)
-      $.fx.save(cur, ["overflow", modifier]); //Save values that need to be restored after animation
-      
-      var ani = {}; ani[modifier] = (type == "show" ? $.data(this, "fx.storage."+modifier) : 0); //This will be our animation
-      
-      if(type == "show") cur.css(modifier, 0);
-      cur.animate(ani, speed, set.easing, function() {
-        if(type != "show") cur.hide(); //if we want to hide the element, set display to none after the animation
-        $.fx.restore(cur, ["overflow", (type == "show" ? null : modifier)]); //Then restore changed values
-        if(callback) callback.apply(this, arguments); //And optionally apply the callback
-      });   
+(function($){
   
-    });
+$.dimensions = {
+  version: '@VERSION'
+};
+
+// Create innerHeight, innerWidth, outerHeight and outerWidth methods
+$.each( [ 'Height', 'Width' ], function(i, name){
+  
+  // innerHeight and innerWidth
+  $.fn[ 'inner' + name ] = function() {
+    if (!this[0]) return;
     
-  }
-  
-})(jQuery);
-
-(function($) {
-
-  //Store some stuff for easy reference later on
-  var restoreThis = [
-    "width", "height", "fontSize", "left", "top",
-    "borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth",
-    "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
-    "marginTop", "marginLeft", "marginBottom", "marginRight"
-  ];
-  
-  $.fx.scale = function(type, set, speed, callback) {
-
-    this.each(function() {
-      
-      if(!set.mode) set.mode = "default"; //Default mode
-      var el = $(this);
-      if(set.mode != "squish") $.fx.relativize(el);
-      $.fx.save(el, restoreThis.concat(["overflow"])); //Save values to restore them later again
-
-      if(type == "show") {
-
-        //Grow the children
-        $('*', el).each(function() {
-          var cur = $(this); if(cur.css("width") == "auto" || cur.css("height") == "auto") return; //Don't continue if 'auto' sized element
-          $.fx.save(cur, ["width", "height", "overflow"]);  //Store data
-          $(this).css({ overflow: 'hidden', width: 0, height: 0 }).animate($.fx.restore(cur, ["width", "height"], true), speed, set.easing, function() { $.fx.restore($(this), ["overflow"]); });
-        });
-  
-        //Grow the parent
-        el.css({
-          fontSize: 0, width: 0, height: 0, left: (parseInt(el.css("left")) || 0)+(el.width() / 2), top: (parseInt(el.css("top")) || 0)+(el.height() / 2),
-          borderLeftWidth: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomWidth: 0,
-          paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0,
-          marginTop: 0, marginLeft: 0, marginBottom: 0, marginRight: 0
-        });
-        
-        el.css("overflow", "hidden").animate($.fx.restore(el, restoreThis, true), speed, set.easing, function() {
-          $.fx.restore(el, ["overflow"]);
-          if(callback) callback.apply(this, arguments);
-        });
-
-      } else {
-         
-        if(set.mode == 'puff') {
-        
-        //Puff the children
-        $('*', el).each(function() {
-          var cur = $(this); if(cur.css("width") == "auto" || cur.css("height") == "auto") return; //Don't continue if 'auto' sized element
-          $.fx.save(cur, ["width", "height", "overflow"]);  //Store data
-          $(this).css({ overflow: 'hidden', width: el.width() * 2, height: el.height() * 2 }).animate($.fx.restore(cur, ["width", "height"], true), speed, set.easing, function() { $.fx.restore($(this), ["overflow"]); });
-        });
-        
-        //Puff the parent
-        el.css("overflow", "hidden").animate({
-          fontSize: '200%', width: el.width() * 2, height: el.height() * 2, opacity: 'hide', top: -(el.height()/2), left: -(el.height()/2)
-        }, speed, set.easing, function() {
-          el.hide(); $.fx.restore(el, restoreThis.concat(["overflow"])); //Hide and restore properties
-          if(callback) callback.apply(this, arguments);
-        });
-        
-        } else {
-        //Shrink the children 
-        $('*', el).each(function() {
-          var cur = $(this); if(cur.css("width") == "auto" || cur.css("height") == "auto") return; //Don't continue if 'auto' sized element
-          $.fx.save(cur, ["width", "height", "overflow"]);        
-          $(this).css("overflow", "hidden").animate({ width: 0, height: 0 }, speed, set.easing, function() { $.fx.restore($(this), ["width", "height", "overflow"]); });
-        });
-
-        //Shrink the parent
-        el.css("overflow", "hidden").animate({
-          fontSize: 0, width: 0, height: 0, left: '+='+(el.width() / 2), top: '+='+(el.height() / 2),
-          borderLeftWidth: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomWidth: 0,
-          paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0,
-          marginTop: 0, marginLeft: 0, marginBottom: 0, marginRight: 0
-        }, speed, set.easing, function() {
-          el.hide(); $.fx.restore(el, restoreThis.concat(["overflow"])); //Hide and restore properties
-          if(callback) callback.apply(this, arguments);
-        });
-        }
-      }
-
-    });
-
-  }
-
-})(jQuery);
-
-(function($) {
-  
-  $.fx.drop = function(type, set, speed, callback) {
-
-    this.each(function() {
-
-      if(!set.direction) set.direction = "left"; //Default direction
-      var cur = $(this);
-      
-      $.fx.relativize(cur);
-      $.fx.save(cur, ["left","top","opacity"]);
-      var ref = (set.direction == "up" || set.direction == "down") ? "top" : "left";
-      var motion = (set.direction == "up" || set.direction == "right") ? "pos" : "neg";
-      var distance = 100;
-      
-      if(type == "show") {
-        cur.css('opacity', 0).css(ref, parseInt(cur.css(ref)) + (motion == "pos" ? distance : -distance));
-        animation = {opacity: 1};
-        animation[ref] = (motion == "pos" ? '-=' : '+=') + distance;
-        cur.animate(animation, speed, set.easing, function() { //Animate
-          $.fx.restore(cur, ["left","top","opacity"]);
-          if(callback) callback.apply(this, arguments);
-        }); 
-      } else { 
-        animation = {opacity: 0};
-        animation[ref] = (motion == "pos" ? '-=' : '+=') + distance;
-        cur.animate(animation, speed, set.easing, function() { //Animate
-          cur.hide();
-          $.fx.restore(cur, ["left","top","opacity"]);
-          if(callback) callback.apply(this, arguments);
-        }); 
-      }
-      
-    });
+    var torl = name == 'Height' ? 'Top'    : 'Left',  // top or left
+        borr = name == 'Height' ? 'Bottom' : 'Right'; // bottom or right
     
-  }
+    return this.is(':visible') ? this[0]['client' + name] : num( this, name.toLowerCase() ) + num(this, 'padding' + torl) + num(this, 'padding' + borr);
+  };
   
-})(jQuery);
-
-(function($) {
-  
-  $.fx.slide = function(type, set, speed, callback) {
-
-    this.each(function() {
-
-      if(!set.direction) set.direction = "left"; //Default direction
-      var cur = $(this);
-      $.fx.relativize(cur);
-      
-      // create a wrapper
-      cur.wrap('<div id="fxWrapper"></div>');
-      var wrapper = cur.parent();
-      wrapper.css({position: 'absolute', overflow: 'hidden'});
-      
-      $.fx.save(cur, ["left","top","opacity"]);
-      var ref = (set.direction == "up" || set.direction == "down") ? "top" : "left";
-      var motion = (set.direction == "up" || set.direction == "right") ? "pos" : "neg";
-      var distance = set.ref == "top" ? wrapper.height() : wrapper.width();
-      
-      if(type == "show") {
-        cur.css(ref, parseInt(cur.css(ref)) + (motion == "pos" ? distance : -distance));
-        animation = {};
-        animation[ref] = (motion == "pos" ? '-=' : '+=') + distance;
-        cur.animate(animation, speed, set.easing, function() { //Animate
-          $.fx.restore(cur, ["left","top","opacity"]);
-          wrapper.replaceWith(cur);
-          if(callback) callback.apply(this, arguments);
-        }); 
-      } else { 
-        animation = {};
-        animation[ref] = (motion == "pos" ? '-=' : '+=') + distance;
-        cur.animate(animation, speed, set.easing, function() { //Animate
-          cur.hide();
-          $.fx.restore(cur, ["left","top","opacity"]);
-          wrapper.replaceWith(cur);
-          if(callback) callback.apply(this, arguments);
-        }); 
-      }
-      
-    });
+  // outerHeight and outerWidth
+  $.fn[ 'outer' + name ] = function(options) {
+    if (!this[0]) return;
     
-  }
-  
-})(jQuery);
-
-
-(function($) {
-  
-  $.fx.shake = function(type, set, speed, callback) {
-
-    this.each(function() {
-      
-      if(!set.times) set.times = 2;
-      //if(!set.speed) set.speed = (speed || 1000) / (set.times * 3)
-      if(!set.distance) set.distance = 15;
-      var cur = $(this), i=0; $.fx.relativize(cur);
-        
-      cur.animate({left: -set.distance}, 60);
-      while (i < set.times) {
-        cur.animate({left: set.distance}, 60).animate({left: -set.distance}, 120);
-        i++;
-      } 
-      cur.animate({left: 0}, 60, function() { //Animate
-        if(callback) callback.apply(this, arguments);
-      });   
-  
-    });
+    var torl = name == 'Height' ? 'Top'    : 'Left',  // top or left
+        borr = name == 'Height' ? 'Bottom' : 'Right'; // bottom or right
     
-  }
-  
-})(jQuery);
-
-(function($) {
-  
-  $.fx.pulsate = function(type, set, speed, callback) {
-
-    this.each(function() {
-      
-      if(!set.times) set.times = 5;
-      if(!set.speed) set.speed = (speed || 3000) / (set.times * 2);
-      var cur = $(this), i=0;
-      
-      while (i < set.times) {
-        cur.fadeOut(set.speed).fadeIn(set.speed);
-        i++;
-      } 
-  
-    });
+    options = $.extend({ margin: false }, options || {});
     
-  }
-  
-})(jQuery);
-
-(function($) {
-  
-  $.fx.highlight = function(type, set, speed, callback) {
-
-    this.each(function() {
-      
-      if(!set.color) set.color = '#ffff99'; //Default color
-      var cur = $(this);
-      var bg = cur.css('backgroundImage');
-      var background = cur.css('backgroundColor');
-      cur.css('backgroundColor', set.color);
-      cur.css('backgroundImage', 'none');
-      cur.animate({backgroundColor: background}, speed, set.easing, function() { //Animate
-        cur.css('backgroundImage', bg);
-        if(callback) callback.apply(this, arguments);
-      });
-    });
+    var val = this.is(':visible') ? 
+        this[0]['offset' + name] : 
+        num( this, name.toLowerCase() )
+          + num(this, 'border' + torl + 'Width') + num(this, 'border' + borr + 'Width')
+          + num(this, 'padding' + torl) + num(this, 'padding' + borr);
     
-  }
+    return val + (options.margin ? (num(this, 'margin' + torl) + num(this, 'margin' + borr)) : 0);
+  };
+});
+
+// Create scrollLeft and scrollTop methods
+$.each( ['Left', 'Top'], function(i, name) {
+  $.fn[ 'scroll' + name ] = function(val) {
+    if (!this[0]) return;
+    
+    return val != undefined ?
+    
+      // Set the scroll offset
+      this.each(function() {
+        this == window || this == document ?
+          window.scrollTo( 
+            name == 'Left' ? val : $(window)[ 'scrollLeft' ](),
+            name == 'Top'  ? val : $(window)[ 'scrollTop'  ]()
+          ) :
+          this[ 'scroll' + name ] = val;
+      }) :
+      
+      // Return the scroll offset
+      this[0] == window || this[0] == document ?
+        self[ (name == 'Left' ? 'pageXOffset' : 'pageYOffset') ] ||
+          $.boxModel && document.documentElement[ 'scroll' + name ] ||
+          document.body[ 'scroll' + name ] :
+        this[0][ 'scroll' + name ];
+  };
+});
+
+$.fn.extend({
+  position: function() {
+    var left = 0, top = 0, elem = this[0], offset, parentOffset, offsetParent, results;
+    
+    if (elem) {
+      // Get *real* offsetParent
+      offsetParent = this.offsetParent();
+      
+      // Get correct offsets
+      offset       = this.offset();
+      parentOffset = offsetParent.offset();
+      
+      // Subtract element margins
+      offset.top  -= num(elem, 'marginTop');
+      offset.left -= num(elem, 'marginLeft');
+      
+      // Add offsetParent borders
+      parentOffset.top  += num(offsetParent, 'borderTopWidth');
+      parentOffset.left += num(offsetParent, 'borderLeftWidth');
+      
+      // Subtract the two offsets
+      results = {
+        top:  offset.top  - parentOffset.top,
+        left: offset.left - parentOffset.left
+      };
+    }
+    
+    return results;
+  },
   
+  offsetParent: function() {
+    var offsetParent = this[0].offsetParent;
+    while ( offsetParent && (!/^body|html$/i.test(offsetParent.tagName) && $.css(offsetParent, 'position') == 'static') )
+      offsetParent = offsetParent.offsetParent;
+    return $(offsetParent);
+  }
+});
+
+function num(el, prop) {
+  return parseInt($.css(el.jquery?el[0]:el,prop))||0;
+};
+
 })(jQuery);
 
 /*
@@ -482,7 +404,551 @@
     red:[255,0,0],
     silver:[192,192,192],
     white:[255,255,255],
-    yellow:[255,255,0]
+    yellow:[255,255,0],
+    transparent: [255,255,255]
   };
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.blind = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position'];
+      
+      // Set options
+      var mode = o.options.mode || 'hide'; // Default Mode
+      var direction = o.options.direction || 'vertical'; // Default direction
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      var wrapper = $.ec.createWrapper(el).css({overflow:'hidden'}); // Create Wrapper
+      var ref = (direction == 'vertical') ? 'height' : 'width';
+      var distance = (direction == 'vertical') ? wrapper.height() : wrapper.width();
+      if(mode == 'show') wrapper.css(ref, 0); // Shift
+      
+      // Animation
+      var animation = {};
+      animation[ref] = mode == 'show' ? distance : 0;
+      
+      // Animate
+      wrapper.animate(animation, o.speed, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      });
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.bounce = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position','top','left','opacity'];
+      
+      // Set options
+      var mode = o.options.mode || 'effect'; // Default Mode
+      var direction = o.options.direction || 'up'; // Default direction
+      var distance = o.options.distance || 20; // Default distance
+      var times = o.options.times || 5; // Default # of times
+      var speed = o.options.speed || 250; // Default speed per bounce
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      $.ec.createWrapper(el); // Create Wrapper
+      var ref = (direction == 'up' || direction == 'down') ? 'top' : 'left';
+      var motion = (direction == 'up' || direction == 'left') ? 'pos' : 'neg';
+      var distance = o.options.distance || (ref == 'top' ? el.outerHeight({margin:true}) / 3 : el.outerWidth({margin:true}) / 3);
+      if (mode == 'show') el.css('opacity', 0).css(ref, motion == 'pos' ? -distance : distance); // Shift
+      if (mode == 'hide') distance = distance / (times * 2);
+      if (mode != 'hide') times--;
+      
+      // Animate
+      if (mode == 'show') { // Show Bounce
+        var animation = {opacity: 1};
+        animation[ref] = (motion == 'pos' ? '+=' : '-=') + distance;
+        el.animate(animation, speed / 2, o.options.easing);
+        distance = distance / 2;
+        times--;
+      };
+      for (var i = 0; i < times; i++) { // Bounces
+        var animation1 = {}, animation2 = {};
+        animation1[ref] = (motion == 'pos' ? '-=' : '+=') + distance;
+        animation2[ref] = (motion == 'pos' ? '+=' : '-=') + distance;
+        el.animate(animation1, speed / 2, o.options.easing).animate(animation2, speed / 2, o.options.easing);
+        distance = (mode == 'hide') ? distance * 2 : distance / 2;
+      };
+      if (mode == 'hide') { // Last Bounce
+        var animation = {opacity: 0};
+        animation[ref] = (motion == 'pos' ? '-=' : '+=')  + distance;
+        el.animate(animation, speed / 2, o.options.easing, function(){
+          el.hide(); // Hide
+          $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+          if(o.callback) o.callback.apply(this, arguments); // Callback
+        });
+      } else {
+        var animation1 = {}, animation2 = {};
+        animation1[ref] = (motion == 'pos' ? '-=' : '+=') + distance;
+        animation2[ref] = (motion == 'pos' ? '+=' : '-=') + distance;
+        el.animate(animation1, speed / 2, o.options.easing).animate(animation2, speed / 2, o.options.easing, function(){
+          $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+          if(o.callback) o.callback.apply(this, arguments); // Callback
+        });
+      };
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.clip = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position','top','left','width','height'];
+      
+      // Set options
+      var mode = o.options.mode || 'hide'; // Default Mode
+      var direction = o.options.direction || 'vertical'; // Default direction
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      $.ec.createWrapper(el).css({overflow:'hidden'}); // Create Wrapper
+      var ref = {
+        size: (direction == 'vertical') ? 'height' : 'width',
+        position: (direction == 'vertical') ? 'top' : 'left'
+      };
+      var distance = (direction == 'vertical') ? el.height() : el.width();
+      if(mode == 'show') { el.css(ref.size, 0); el.css(ref.position, distance / 2); } // Shift
+      
+      // Animation
+      var animation = {};
+      animation[ref.size] = mode == 'show' ? distance : 0;
+      animation[ref.position] = mode == 'show' ? 0 : distance / 2;
+        
+      // Animate
+      el.animate(animation, o.speed, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      }); 
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.drop = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position','top','left','opacity'];
+      
+      // Set options
+      var mode = o.options.mode || 'hide'; // Default Mode
+      var direction = o.options.direction || 'left'; // Default Direction
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      $.ec.createWrapper(el); // Create Wrapper
+      var ref = (direction == 'up' || direction == 'down') ? 'top' : 'left';
+      var motion = (direction == 'up' || direction == 'left') ? 'pos' : 'neg';
+      var distance = o.options.distance || (ref == 'top' ? el.outerHeight({margin:true}) / 2 : el.outerWidth({margin:true}) / 2);
+      if (mode == 'show') el.css('opacity', 0).css(ref, motion == 'pos' ? -distance : distance); // Shift
+      
+      // Animation
+      var animation = {opacity: mode == 'show' ? 1 : 0};
+      animation[ref] = (mode == 'show' ? (motion == 'pos' ? '+=' : '-=') : (motion == 'pos' ? '-=' : '+=')) + distance;
+      
+      // Animate
+      el.animate(animation, o.speed, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      });
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.fold = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position'];
+      
+      // Set options
+      var mode = o.options.mode || 'hide'; // Default Mode
+      var size = o.options.size || 15; // Default fold size
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      var wrapper = $.ec.createWrapper(el).css({overflow:'hidden'}); // Create Wrapper
+      var ref = (mode == 'show') ? ['width', 'height'] : ['height', 'width'];
+      var distance = (mode == 'show') ? [wrapper.width(), wrapper.height()] : [wrapper.height(), wrapper.width()];
+      if(mode == 'show') wrapper.css({height: size, width: 0}); // Shift
+      
+      // Animation
+      var animation1 = {}, animation2 = {};
+      animation1[ref[0]] = mode == 'show' ? distance[0] : size;
+      animation2[ref[1]] = mode == 'show' ? distance[1] : 0;
+      
+      // Animate
+      wrapper.animate(animation1, o.speed / 2, o.options.easing)
+      .animate(animation2, o.speed / 2, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      });
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.highlight = function(o) {
+
+    this.each(function() {
+      
+      // Create element
+      var el = $(this), props = ['backgroundImage','backgroundColor','opacity'];
+      
+      // Set options
+      var mode = o.options.mode || 'show'; // Default mode
+      var color = o.options.color || "#ffff99"; // Default highlight color
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      el.css({backgroundImage: 'none', backgroundColor: color}); // Shift
+      
+      // Animation
+      var animation = {backgroundColor: $.data(this, "ec.storage.backgroundColor")};
+      if (mode == "hide") animation['opacity'] = 0;
+      
+      // Animate
+      el.animate(animation, o.speed, o.options.easing, function() { //Animate
+        if(mode == "hide") el.hide();
+        $.ec.restore(el, props);
+        if(o.callback) o.callback.apply(this, arguments);
+      });
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.pulsate = function(o) {
+
+    this.each(function() {
+      
+      // Create element
+      var el = $(this);
+      
+      // Set options
+      var mode = o.options.mode || 'show'; // Default mode
+      var times = o.options.times || 5; // Default # of times
+      
+      // Adjust
+      if (mode != 'hide') times--;
+      if (el.is(':hidden')) { // Show fadeIn
+        el.css('opacity', 0);
+        el.show(); // Show
+        el.animate({opacity: 1}, o.speed / 2, o.options.easing);
+        times--;
+      }
+      
+      // Animate
+      for (var i = 0; i < times; i++) { // Pulsate
+        el.animate({opacity: 0}, o.speed / 2, o.options.easing).animate({opacity: 1}, o.speed / 2, o.options.easing);
+      };
+      if (mode == 'hide') { // Last Pulse
+        el.animate({opacity: 0}, o.speed / 2, o.options.easing, function(){
+          el.hide(); // Hide
+          if(o.callback) o.callback.apply(this, arguments); // Callback
+        });
+      } else {
+        el.animate({opacity: 0}, o.speed / 2, o.options.easing).animate({opacity: 1}, o.speed / 2, o.options.easing, function(){
+          if(o.callback) o.callback.apply(this, arguments); // Callback
+        });
+      };
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.puff = function(o) {
+  
+     this.each(function() {
+  
+      // Create element
+      var el = $(this);
+    
+      // Set options
+      var mode = o.options.mode || 'hide'; // Set default mode
+      var percent = parseInt(o.options.percent) || 150; // Set default puff percent
+      o.options.fade = true; // It's not a puff if it doesn't fade! :)
+      var original = {height: el.height(), width: el.width()}; // Save original
+    
+      // Adjust
+      var factor = percent / 100;
+      el.from = (mode == 'hide') ? original : {height: original.height * factor, width: original.width * factor};
+    
+      // Animation
+      o.options.from = el.from;
+      o.options.percent = (mode == 'hide') ? percent : 100;
+    
+      // Animate
+      el.effect('scale', o.options, o.speed, o.callback);
+     
+    });
+    
+  };
+
+  $.ec.scale = function(o) {
+    
+    this.each(function() {
+    
+      // Create element
+      var el = $(this);
+
+      // Set options
+      var mode = o.options.mode || 'effect'; // Set default mode
+      var percent = parseInt(o.options.percent) || (parseInt(o.options.percent) == 0 ? 0 : (mode == 'hide' ? 0 : 100)); // Set default scaling percent
+      var direction = o.options.direction || 'both'; // Set default axis
+      var origin = o.options.origin; // The origin of the scaling
+      if (mode != 'effect') { // Set default origin and restore for show/hide
+        origin = origin || ['middle','center'];
+        o.options.restore = true;
+      }
+      var original = {height: el.height(), width: el.width()}; // Save original
+      el.from = o.options.from || (mode == 'show' ? {height: 0, width: 0} : original); // Default from state
+    
+      // Adjust
+      var factor = { // Set scaling factor
+        y: direction != 'horizontal' ? (percent / 100) : 1,
+        x: direction != 'vertical' ? (percent / 100) : 1
+      };
+      el.to = {height: original.height * factor.y, width: original.width * factor.x}; // Set to state
+      if (origin) { // Calculate baseline shifts
+        var baseline = $.ec.getBaseline(origin, original);
+        el.from.top = (original.height - el.from.height) * baseline.y;
+        el.from.left = (original.width - el.from.width) * baseline.x;
+        el.to.top = (original.height - el.to.height) * baseline.y;
+        el.to.left = (original.width - el.to.width) * baseline.x;
+      };
+      if (o.options.fade) { // Fade option to support puff
+        if (mode == 'show') {el.from.opacity = 0; el.to.opacity = 1;};
+        if (mode == 'hide') {el.from.opacity = 1; el.to.opacity = 0;};
+      };
+    
+      // Animation
+      o.options.from = el.from; o.options.to = el.to;
+    
+      // Animate
+      el.effect('size', o.options, o.speed, o.callback);
+      
+    });
+    
+  };
+  
+  $.ec.size = function(o) {
+
+    this.each(function() {
+      
+      // Create element
+      var el = $(this), props = ['position','top','left','width','height','overflow','opacity'];
+      var props1 = ['position','overflow','opacity']; // Always restore
+      var props2 = ['width','height','overflow']; // Copy for children
+      var cProps = ['fontSize'];
+      var vProps = ['borderTopWidth', 'borderBottomWidth', 'paddingTop', 'paddingBottom'];
+      var hProps = ['borderLeftWidth', 'borderRightWidth', 'paddingLeft', 'paddingRight'];
+      
+      // Set options
+      var mode = o.options.mode || 'effect'; // Set default mode
+      var restore = o.options.restore || false; // Default restore
+      var scale = o.options.scale || 'both'; // Default scale mode
+      var original = {height: el.height(), width: el.width()}; // Save original
+      el.from = o.options.from || original; // Default from state
+      el.to = o.options.to || original; // Default to state
+      
+      // Adjust
+      var factor = { // Set scaling factor
+        from: {y: el.from.height / original.height, x: el.from.width / original.width},
+        to: {y: el.to.height / original.height, x: el.to.width / original.width}
+      };
+      if (scale == 'box' || scale == 'both') { // Scale the css box
+        if (factor.from.y != factor.to.y) { // Vertical props scaling
+          props = props.concat(vProps);
+          el.from = $.ec.setTransition(el, vProps, factor.from.y, el.from);
+          el.to = $.ec.setTransition(el, vProps, factor.to.y, el.to);
+        };
+        if (factor.from.x != factor.to.x) { // Horizontal props scaling
+          props = props.concat(hProps);
+          el.from = $.ec.setTransition(el, hProps, factor.from.x, el.from);
+          el.to = $.ec.setTransition(el, hProps, factor.to.x, el.to);
+        };
+      };
+      if (scale == 'content' || scale == 'both') { // Scale the content
+        if (factor.from.y != factor.to.y) { // Vertical props scaling
+          props = props.concat(cProps);
+          el.from = $.ec.setTransition(el, cProps, factor.from.y, el.from);
+          el.to = $.ec.setTransition(el, cProps, factor.to.y, el.to);
+        };
+      };
+      $.ec.save(el, restore ? props : props1); el.show(); // Save & Show
+      $.ec.createWrapper(el); // Create Wrapper
+      el.css('overflow','hidden').css(el.from); // Shift
+      
+      // Animate
+      if (scale == 'content' || scale == 'both') { // Scale the children
+        vProps = vProps.concat(['marginTop','marginBottom']).concat(cProps); // Add margins/font-size
+        hProps = hProps.concat(['marginLeft','marginRight']); // Add margins
+        props2 = props.concat(vProps).concat(hProps); // Concat
+        el.find("*[width]").each(function(){
+          child = $(this);
+          if (restore) $.ec.save(child, props2);
+          var c_original = {height: child.height(), width: child.width()}; // Save original
+          child.from = {height: c_original.height * factor.from.y, width: c_original.width * factor.from.x};
+          child.to = {height: c_original.height * factor.to.y, width: c_original.width * factor.to.x};
+          if (factor.from.y != factor.to.y) { // Vertical props scaling
+            child.from = $.ec.setTransition(child, vProps, factor.from.y, child.from);
+            child.to = $.ec.setTransition(child, vProps, factor.to.y, child.to);
+          };
+          if (factor.from.x != factor.to.x) { // Horizontal props scaling
+            child.from = $.ec.setTransition(child, hProps, factor.from.x, child.from);
+            child.to = $.ec.setTransition(child, hProps, factor.to.x, child.to);
+          };
+          child.css(child.from); // Shift children
+          child.animate(child.to, o.speed, o.options.easing, function(){
+            if (restore) $.ec.restore(child, props2); // Restore children
+          }); // Animate children
+        });
+      };
+      
+      // Animate
+      el.animate(el.to, o.speed, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        $.ec.restore(el, restore ? props : props1); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      }); 
+      
+    });
+
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.shake = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position','top','left'];
+      
+      // Set options
+      var mode = 'effect'; // Default Mode
+      var direction = o.options.direction || 'left'; // Default direction
+      var distance = o.options.distance || 20; // Default distance
+      var times = o.options.times || 3; // Default # of times
+      var speed = o.options.speed || 140; // Default speed per shake
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      $.ec.createWrapper(el); // Create Wrapper
+      var ref = (direction == 'up' || direction == 'down') ? 'top' : 'left';
+      var motion = (direction == 'up' || direction == 'left') ? 'pos' : 'neg';
+      
+      // Animation
+      var animation = {}, animation1 = {}, animation2 = {};
+      animation[ref] = (motion == 'pos' ? '-=' : '+=')  + distance;
+      animation1[ref] = (motion == 'pos' ? '+=' : '-=')  + distance * 2;
+      animation2[ref] = (motion == 'pos' ? '-=' : '+=')  + distance * 2;
+      
+      // Animate
+      el.animate(animation, speed, o.options.easing);
+      for (var i = 1; i < times; i++) { // Shakes
+        el.animate(animation1, speed, o.options.easing).animate(animation2, speed, o.options.easing)
+      };
+      el.animate(animation1, speed, o.options.easing).
+      animate(animation, speed / 2, o.options.easing, function(){ // Last shake
+        $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      });
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
+  $.ec.slide = function(o) {
+
+    this.each(function() {
+
+      // Create element
+      var el = $(this), props = ['position','top','left'];
+      
+      // Set options
+      var mode = o.options.mode || 'show'; // Default Mode
+      var direction = o.options.direction || 'left'; // Default Direction
+      
+      // Adjust
+      $.ec.save(el, props); el.show(); // Save & Show
+      $.ec.createWrapper(el).css({overflow:'hidden'}); // Create Wrapper
+      var ref = (direction == 'up' || direction == 'down') ? 'top' : 'left';
+      var motion = (direction == 'up' || direction == 'left') ? 'pos' : 'neg';
+      var distance = o.options.distance || (ref == 'top' ? el.outerHeight({margin:true}) : el.outerWidth({margin:true}));
+      if (mode == 'show') el.css(ref, motion == 'pos' ? -distance : distance); // Shift
+      
+      // Animation
+      var animation = {};
+      animation[ref] = (mode == 'show' ? (motion == 'pos' ? '+=' : '-=') : (motion == 'pos' ? '-=' : '+=')) + distance;
+      
+      // Animate
+      el.animate(animation, o.speed, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        $.ec.restore(el, props); $.ec.removeWrapper(el); // Restore
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      });
+      
+    });
+    
+  }
   
 })(jQuery);

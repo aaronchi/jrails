@@ -2,10 +2,6 @@ module ActionView
   module Helpers
     module PrototypeHelper
       
-      def link_to_remote(name, options = {}, html_options = nil)  
-        link_to_function(name, remote_function(options), html_options || options.delete(:html))
-      end
-      
       def periodically_call_remote(options = {})
         frequency = options[:frequency] || 10 # every ten seconds by default
         code = "setInterval(function() {#{remote_function(options)}}, #{frequency} * 1000)"
@@ -32,14 +28,6 @@ module ActionView
         function = "if (#{options[:condition]}) { #{function}; }" if options[:condition]
         function = "if (confirm('#{escape_javascript(options[:confirm])}')) { #{function}; }" if options[:confirm]
         return function
-      end
-      
-      def observe_field(field_id, options = {})
-        if options[:frequency] && options[:frequency] > 0
-          build_observer('Form.Element.Observer', field_id, options)
-        else
-          build_observer('Form.Element.EventObserver', field_id, options)
-        end
       end
       
       class JavaScriptGenerator
@@ -80,12 +68,6 @@ module ActionView
             record "$('##{ids.join(',#')}').toggle()"         
           end
           
-        private
-        
-          def escape_javascript(javascript)
-            javascript.gsub('\\','\0\0').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
-          end
-          
         end
       end
       
@@ -108,7 +90,7 @@ module ActionView
           js_options['data'] = options[:with].gsub('Form.serialize(this.form)','$.param($(this.form).serializeArray())')
         end
         
-        if protect_against_forgery?
+        if respond_to?('protect_against_forgery?') && protect_against_forgery?
           if js_options['data']
             js_options['data'] << " + '&"
           else
@@ -129,7 +111,6 @@ module ActionView
       end
       
       def build_observer(klass, name, options = {})
-        klass = (klass[0..0].downcase + klass[1..-1]).gsub('.','')
         if options[:with] && (options[:with] !~ /[\{=(.]/)
           options[:with] = "'#{options[:with]}=' + value"
         else
@@ -137,8 +118,8 @@ module ActionView
         end
 
         callback = options[:function] || remote_function(options)
-        javascript  = "$('##{name}').#{klass}("
-        javascript << "#{options[:frequency]}, " if options[:frequency]
+        javascript  = "$('##{name}').delayedObserver("
+        javascript << "#{options[:frequency] || 0}, "
         javascript << "function(element, value) {"
         javascript << "#{callback}}"
         #javascript << ", '#{options[:on]}'" if options[:on]
