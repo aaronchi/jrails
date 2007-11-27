@@ -613,7 +613,7 @@ function num(el, prop) {
       // Animate
       el.animate(animation, o.speed, o.options.easing, function() {
         if(mode == 'hide') el.hide(); // Hide
-        if(mode != 'effect') $.ec.restore(el, props); // Restore
+        if(mode == 'hide') $.ec.restore(el, props); // Restore
         if(o.callback) o.callback.apply(this, arguments); // Callback
       });
       
