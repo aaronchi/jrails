@@ -144,24 +144,63 @@ module ActionView
     
     module ScriptaculousHelper
       
+      unless const_defined? :TOGGLE_EFFECTS
+        TOGGLE_EFFECTS = [:toggle_appear, :toggle_slide, :toggle_blind]
+      end
+      
+      unless const_defined? :SCRIPTACULOUS_EFFECTS
+        SCRIPTACULOUS_EFFECTS = {
+          :appear => {:method => 'fade', :options => {:mode => 'show'}},
+          :blind_down => {:method => 'blind', :options => {:direction => 'vertical', :mode => 'show'}},
+          :blind_up => {:method => 'blind', :options => {:direction => 'vertical', :mode => 'hide'}},
+          :blind_right => {:method => 'blind', :options => {:direction => 'horizontal', :mode => 'show'}},
+          :blind_left => {:method => 'blind', :options => {:direction => 'horizontal', :mode => 'hide'}},
+          :bounce_in => {:method => 'bounce', :options => {:direction => 'up', :mode => 'show'}},
+          :bounce_out => {:method => 'bounce', :options => {:direction => 'up', :mode => 'hide'}},
+          :drop_in => {:method => 'drop', :options => {:direction => 'up', :mode => 'show'}},
+          :drop_out => {:method => 'drop', :options => {:direction => 'down', :mode => 'hide'}},
+          :fold_in => {:method => 'fold', :options => {:mode => 'hide'}},
+          :fold_out => {:method => 'fold', :options => {:mode => 'show'}},
+          :grow => {:method => 'scale', :options => {:mode => 'show'}},
+          :shrink => {:method => 'scale', :options => {:mode => 'hide'}},
+          :slide_down => {:method => 'slide', :options => {:direction => 'up', :mode => 'show'}},
+          :slide_up => {:method => 'slide', :options => {:direction => 'up', :mode => 'hide'}},
+          :slide_right => {:method => 'slide', :options => {:direction => 'right', :mode => 'show'}},
+          :slide_left => {:method => 'slide', :options => {:direction => 'right', :mode => 'hide'}},
+          :squish => {:method => 'scale', :options => {:origin => "['top','left']", :mode => 'hide'}},
+          :switch_on => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'show'}},
+          :switch_off => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'hide'}}
+        }
+      end
+      
       def visual_effect(name, element_id = false, js_options = {})
-        #element = element_id ? element_id.to_json : "element"
+        element = element_id ? element_id : "this"
         
-        js_options[:queue] = if js_options[:queue].is_a?(Hash)
-          '{' + js_options[:queue].map {|k, v| k == :limit ? "#{k}:#{v}" : "#{k}:'#{v}'" }.join(',') + '}'
-        elsif js_options[:queue]
-          "'#{js_options[:queue]}'"
-        end if js_options[:queue]
+        if SCRIPTACULOUS_EFFECTS.has_key? name.to_sym
+          effect = SCRIPTACULOUS_EFFECTS[name.to_sym]
+          name = effect[:method]
+          js_options = js_options.merge effect[:options]
+        end
         
-        [:endcolor, :direction, :startcolor, :scaleMode, :restorecolor].each do |option|
+        [:color, :direction, :mode].each do |option|
           js_options[option] = "'#{js_options[option]}'" if js_options[option]
         end
-
-        if TOGGLE_EFFECTS.include? name.to_sym
-          "Effect.toggle(#{element},'#{name.to_s.gsub(/^toggle_/,'')}',#{options_for_javascript(js_options)});"
+        
+        if js_options.has_key? :duration
+          speed = js_options.delete :duration
+          speed = (speed * 1000).to_i unless speed.nil?
         else
-          "$('##{element_id}').#{name.to_s.camelize}(#{options_for_javascript(js_options) unless js_options.empty?});"
+          speed = js_options.delete :speed
         end
+        
+        #if TOGGLE_EFFECTS.include? name.to_sym
+        #  "Effect.toggle(#{element},'#{name.to_s.gsub(/^toggle_/,'')}',#{options_for_javascript(js_options)});"
+        
+        javascript = "$('##{element_id}').effect('#{name.to_s.downcase}'"
+        javascript << ",#{options_for_javascript(js_options)}" unless speed.nil? && js_options.empty?
+        javascript << ",#{speed}" unless speed.nil?
+        javascript << ")"
+        
       end
       
       def sortable_element_js(element_id, options = {})

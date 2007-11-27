@@ -10,7 +10,6 @@
     },
     restore: function(el, set) {
       for(var i=0;i<set.length;i++) {
-       if (name == 'size') alert(set[i] + ' ' + $.data(el[0], "ec.storage."+set[i]));
         if(set[i] !== null) el.css(set[i], $.data(el[0], "ec.storage."+set[i]));  
       }
     },
@@ -593,6 +592,38 @@ function num(el, prop) {
 
 (function($) {
   
+  $.ec.fade = function(o) {
+
+    this.each(function() {
+      
+      // Create element
+      var el = $(this);
+      
+      // Set options
+      var mode = o.options.mode || 'effect'; // Default mode
+      var opacity = o.options.opacity || 0; // Default fade opacity
+      
+      // Adjust
+      el.show(); // Show
+      if(mode == 'show') el.css({opacity: 0}); // Shift
+      
+      // Animation
+      var animation = {opacity: mode == 'show' ? 1 : opacity};
+      
+      // Animate
+      el.animate(animation, o.speed, o.options.easing, function() {
+        if(mode == 'hide') el.hide(); // Hide
+        if(o.callback) o.callback.apply(this, arguments); // Callback
+      });
+      
+    });
+    
+  }
+  
+})(jQuery);
+
+(function($) {
+  
   $.ec.fold = function(o) {
 
     this.each(function() {
@@ -728,6 +759,7 @@ function num(el, prop) {
       // Animation
       o.options.from = el.from;
       o.options.percent = (mode == 'hide') ? percent : 100;
+      o.options.mode = mode;
     
       // Animate
       el.effect('scale', o.options, o.speed, o.callback);
