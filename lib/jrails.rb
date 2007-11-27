@@ -41,7 +41,7 @@ module ActionView
             insertion = position.to_s.downcase
             insertion = 'append' if insertion == 'bottom'
             insertion = 'prepend' if insertion == 'top'
-            record "$('##{id}').#{insertion}('#{render(*options_for_render)}')"
+            record "$('##{id}').#{insertion}('#{escape_javascript(render(*options_for_render))}')"
           end
           
           def replace_html(id, *options_for_render)
@@ -49,7 +49,7 @@ module ActionView
           end
           
           def replace(id, *options_for_render)
-            record "$('##{ids.join(',#')}').replaceWith('#{render(*options_for_render)}')"
+            record "$('##{ids.join(',#')}').replaceWith('#{escape_javascript(render(*options_for_render))}')"
           end
           
           def remove(*ids)
