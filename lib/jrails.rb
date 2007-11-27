@@ -49,7 +49,7 @@ module ActionView
           end
           
           def replace(id, *options_for_render)
-            record "$('##{ids.join(',#')}').replaceWith('#{escape_javascript(render(*options_for_render))}')"
+            record "$('##{id}').replaceWith('#{escape_javascript(render(*options_for_render))}')"
           end
           
           def remove(*ids)
