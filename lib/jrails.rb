@@ -165,8 +165,8 @@ module ActionView
           :shrink => {:method => 'scale', :options => {:mode => 'hide'}},
           :slide_down => {:method => 'slide', :options => {:direction => 'up', :mode => 'show'}},
           :slide_up => {:method => 'slide', :options => {:direction => 'up', :mode => 'hide'}},
-          :slide_right => {:method => 'slide', :options => {:direction => 'right', :mode => 'show'}},
-          :slide_left => {:method => 'slide', :options => {:direction => 'right', :mode => 'hide'}},
+          :slide_right => {:method => 'slide', :options => {:direction => 'left', :mode => 'show'}},
+          :slide_left => {:method => 'slide', :options => {:direction => 'left', :mode => 'hide'}},
           :squish => {:method => 'scale', :options => {:origin => "['top','left']", :mode => 'hide'}},
           :switch_on => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'show'}},
           :switch_off => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'hide'}}
