@@ -1,5 +1,5 @@
 # Install hook code here
-puts "Copying Files."
+puts "Copying files..."
 
 dir = "javascripts"
 ["jquery-fx.js", "jquery-ui.js", "jquery.js", "jrails.js"].each do |js_file|
@@ -8,5 +8,4 @@ dir = "javascripts"
 	FileUtils.cp_r(src_file, dest_file)
 end
 
-
-puts "\nFiles copied. Installation Complete"
+puts "Files copied - Installation complete!"
