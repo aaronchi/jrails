@@ -3,7 +3,7 @@ namespace :jrails do
     desc "Copies the jQuery and jRails javascripts to public/javascripts"
     task :javascripts do
 	puts "Copying files..."
-      JRAILS_PATH = File.join(File.dirname(__FILE__), '../')
+      JRAILS_PATH = RAILS_ROOT + '/vendor/plugins/jrails'
       project_dir = RAILS_ROOT + '/public/javascripts/'
       scripts = Dir[JRAILS_PATH + '/javascripts/*.js']
       FileUtils.cp(scripts, project_dir)
