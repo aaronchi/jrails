@@ -4,7 +4,7 @@ namespace :jrails do
     task :javascripts do
       puts "Copying files..."
       project_dir = RAILS_ROOT + '/public/javascripts/'
-      scripts = RAILS_ROOT + '/vendor/plugins/jrails/javascripts/*.js'
+      scripts = Dir[File.join(File.dirname(__FILE__), '..') + '/javascripts/*.js']
       FileUtils.cp(scripts, project_dir)
       puts "files copied successfully."
     end
