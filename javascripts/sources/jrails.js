@@ -71,6 +71,9 @@
 
 (function($) {
   $.fn.extend({
+    visualEffect : function(o) {
+      return this.effect(o);
+    },
     Appear : function(speed, callback) {
       return this.fadeIn(speed, callback);
     },

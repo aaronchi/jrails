@@ -33,15 +33,11 @@ module ActionView
       class JavaScriptGenerator
         module GeneratorMethods
           
-          def select(pattern)
-            record "$('#{pattern}')"
-          end
-          
           def insert_html(position, id, *options_for_render)
             insertion = position.to_s.downcase
             insertion = 'append' if insertion == 'bottom'
             insertion = 'prepend' if insertion == 'top'
-            call "$('##{id}').#{insertion}", render(*options_for_render)
+            call "$(\"##{id}\").#{insertion}", render(*options_for_render)
           end
           
           def replace_html(id, *options_for_render)
@@ -49,23 +45,23 @@ module ActionView
           end
           
           def replace(id, *options_for_render)
-            call "$('##{id}').replaceWith", render(*options_for_render)
+            call "$(\"##{id}\").replaceWith", render(*options_for_render)
           end
           
           def remove(*ids)
-            call "$('##{ids.join(',#')}').remove"
+            call "$(\"##{ids.join(',#')}\").remove"
           end
           
           def show(*ids)
-            call "$('##{ids.join(',#')}').show"
+            call "$(\"##{ids.join(',#')}\").show"
           end
           
           def hide(*ids)
-            call "$('##{ids.join(',#')}').hide"
+            call "$(\"##{ids.join(',#')}\").hide"
           end
 
           def toggle(*ids)
-            call "$('##{ids.join(',#')}').toggle"
+            call "$(\"##{ids.join(',#')}\").toggle"
           end
           
         end
@@ -85,7 +81,7 @@ module ActionView
         if options[:form]
           js_options['data'] = "$.param($(this).serializeArray())"
         elsif options[:submit]
-          js_options['data'] = "$('##{options[:submit]}').serializeArray()"
+          js_options['data'] = "$(\"##{options[:submit]}\").serializeArray()"
         elsif options[:with]
           js_options['data'] = options[:with].gsub('Form.serialize(this.form)','$.param($(this.form).serializeArray())')
         end
@@ -107,7 +103,7 @@ module ActionView
         insertion = options[:position].to_s.downcase if options[:position]
         insertion = 'append' if insertion == 'bottom'
         insertion = 'prepend' if insertion == 'top'
-        "$('##{options[:update]}').#{insertion}(request.responseText);"
+        "$(\"##{options[:update]}\").#{insertion}(request.responseText);"
       end
       
       def build_observer(klass, name, options = {})
@@ -118,7 +114,7 @@ module ActionView
         end
 
         callback = options[:function] || remote_function(options)
-        javascript  = "$('##{name}').delayedObserver("
+        javascript  = "$(\"##{name}\").delayedObserver("
         javascript << "#{options[:frequency] || 0}, "
         javascript << "function(element, value) {"
         javascript << "#{callback}}"
@@ -140,6 +136,27 @@ module ActionView
         callbacks
       end
       
+    end
+    
+    class JavaScriptElementProxy < JavaScriptProxy #:nodoc:
+      def initialize(generator, id)
+        @id = id
+        super(generator, "$(\"##{id}\")")
+      end
+      
+      def replace_html(*options_for_render)
+        call 'html', @generator.send(:render, *options_for_render)
+      end
+
+      def replace(*options_for_render)
+        call 'replaceWith', @generator.send(:render, *options_for_render)
+      end
+    end
+    
+    class JavaScriptElementCollectionProxy < JavaScriptCollectionProxy #:nodoc:\
+      def initialize(generator, pattern)
+        super(generator, "$(#{pattern.to_json})")
+      end
     end
     
     module ScriptaculousHelper
@@ -196,7 +213,7 @@ module ActionView
         #if TOGGLE_EFFECTS.include? name.to_sym
         #  "Effect.toggle(#{element},'#{name.to_s.gsub(/^toggle_/,'')}',#{options_for_javascript(js_options)});"
         
-        javascript = "$('##{element_id}').effect('#{name.to_s.downcase}'"
+        javascript = "$(\"##{element_id}\").effect(\"#{name.to_s.downcase}\""
         javascript << ",#{options_for_javascript(js_options)}" unless speed.nil? && js_options.empty?
         javascript << ",#{speed}" unless speed.nil?
         javascript << ")"
@@ -222,11 +239,11 @@ module ActionView
         
         options.delete_if { |key, value| [:only, :tag, :overlap, :hoverclass].include?(key) }
         
-        "$('##{element_id}').sortable(#{options_for_javascript(options) unless options.empty? });"
+        "$(\"##{element_id}\").sortable(#{options_for_javascript(options) unless options.empty? });"
       end
       
       def draggable_element_js(element_id, options = {})
-        "$('##{element_id}').draggable(#{options_for_javascript(options) unless options.empty? });"
+        "$(\"##{element_id}\").draggable(#{options_for_javascript(options) unless options.empty? });"
       end
       
       def drop_receiving_element_js(element_id, options = {})
@@ -243,7 +260,7 @@ module ActionView
         
         options.delete_if { |key, value| [:hoverclass].include?(key) }
         
-        "$('##{element_id}').droppable(#{options_for_javascript(options) unless options.empty? });"
+        "$(\"##{element_id}\").droppable(#{options_for_javascript(options) unless options.empty? });"
       end
       
     end
