@@ -2,12 +2,11 @@ namespace :jrails do
   namespace :update do
     desc "Copies the jQuery and jRails javascripts to public/javascripts"
     task :javascripts do
-	puts "Copying files..."
-      JRAILS_PATH = RAILS_ROOT + '/vendor/plugins/jrails'
+      puts "Copying files..."
       project_dir = RAILS_ROOT + '/public/javascripts/'
-      scripts = Dir[JRAILS_PATH + '/javascripts/*.js']
+      scripts = RAILS_ROOT + '/vendor/plugins/jrails/javascripts/*.js'
       FileUtils.cp(scripts, project_dir)
-	puts "files copied successfully."
+      puts "files copied successfully."
     end
   end
   
