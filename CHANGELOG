@@ -1,3 +1,9 @@
+SVN
+* Added Tasks (thanks ggarside)
+* Improve visual_effects methods
+* Fixed some RJS calls
+* Fixed observer code for ie
+
 0.2.0 (26 Nov 2007)
 * Vastly Improved FX
 * Improved Form Observers
