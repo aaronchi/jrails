@@ -1,4 +1,5 @@
 SVN
+* Add text/javascript request header to fix format.js
 * Added Tasks (thanks ggarside)
 * Improve visual_effects methods
 * Fixed some RJS calls
