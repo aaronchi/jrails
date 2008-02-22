@@ -185,7 +185,7 @@ module ActionView
           :slide_up => {:method => 'slide', :options => {:direction => 'up', :mode => 'hide'}},
           :slide_right => {:method => 'slide', :options => {:direction => 'left', :mode => 'show'}},
           :slide_left => {:method => 'slide', :options => {:direction => 'left', :mode => 'hide'}},
-          :squish => {:method => 'scale', :options => {:origin => "['top','left']", :mode => 'hide'}},
+          :squish => {:method => 'scale', :options => {:origin => '["top","left"]', :mode => 'hide'}},
           :switch_on => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'show'}},
           :switch_off => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'hide'}}
         }
@@ -201,7 +201,7 @@ module ActionView
         end
         
         [:color, :direction, :mode].each do |option|
-          js_options[option] = "'#{js_options[option]}'" if js_options[option]
+          js_options[option] = "\"#{js_options[option]}\"" if js_options[option]
         end
         
         if js_options.has_key? :duration
