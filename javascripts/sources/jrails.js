@@ -86,7 +86,7 @@
       return this;
     },
     BlindRight : function(speed, callback) {
-      this.show({'blind', { direction: 'horizontal' }, speed, callback); 
+      this.show('blind', { direction: 'horizontal' }, speed, callback); 
       return this;
     },
     BlindLeft : function(speed, callback) {
