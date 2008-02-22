@@ -1,4 +1,5 @@
-SVN
+0.3.0 (22 Feb 2008)
+* updated to jquery-fx 1.0b and jquery-ui 1.5b
 * Add text/javascript request header to fix format.js
 * Added Tasks (thanks ggarside)
 * Improve visual_effects methods
