@@ -74,10 +74,10 @@ module ActionView
         url_options = options[:url]
         url_options = url_options.merge(:escape => false) if url_options.is_a?(Hash)
         js_options['url'] = "'#{url_for(url_options)}'"
-        js_options['beforeSend'] = "function(xhr) {xhr.setRequestHeader('Accept', 'text/javascript')}"
-        js_options['async'] = options[:type] != :synchronous
-        js_options['type'] = method_option_to_s(options[:method]) if options[:method]
-        js_options['dataType'] = options[:script].nil? ? "'script'" : (options[:script] == false ? "'html'" : "'script'") 
+        js_options['beforeSend'] = "function(xhr) {xhr.setRequestHeader('Accept', 'text/javascript, text/html, application/xml, text/xml, */*')}"
+				js_options['async'] = options[:type] != :synchronous        
+				js_options['type'] = options[:method] ? method_option_to_s(options[:method]) : ( options[:form] ? "'post'" : nil )
+				js_options['dataType'] = options[:script].nil? ? (options[:update].nil? ? "'script'" : "'html'") : (options[:script] == false ? "'html'" : "'script'")
         
         if options[:form]
           js_options['data'] = "$.param($(this).serializeArray())"
