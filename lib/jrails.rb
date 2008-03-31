@@ -104,7 +104,7 @@ module ActionView
         insertion = options[:position].to_s.downcase if options[:position]
         insertion = 'append' if insertion == 'bottom'
         insertion = 'prepend' if insertion == 'top'
-        "$(\"##{options[:update]}\").#{insertion}(request.responseText);"
+        "$('##{options[:update]}').#{insertion}(request.responseText);"
       end
       
       def build_observer(klass, name, options = {})
