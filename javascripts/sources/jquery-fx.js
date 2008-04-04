@@ -1,4 +1,4 @@
-(function($) {
+﻿(function($) {
 
   $.ec = $.ec || {}; //Add the 'ec' scope
 
@@ -108,7 +108,7 @@
     //Save old methods
     _show: $.fn.show,
     _hide: $.fn.hide,
-    _toggle: $.fn.toggle,
+    __toggle: $.fn.toggle,
     _addClass: $.fn.addClass,
     _removeClass: $.fn.removeClass,
     _toggleClass: $.fn.toggleClass,
@@ -133,8 +133,8 @@
       }
     },
     toggle: function(){
-      if(!arguments[0] || (arguments[0].constructor == Number || /(slow|normal|fast)/.test(arguments[0])))
-        return this._toggle.apply(this, arguments);
+      if(!arguments[0] || (arguments[0].constructor == Number || /(slow|normal|fast)/.test(arguments[0])) || (arguments[0].constructor == Function))
+        return this.__toggle.apply(this, arguments);
       else {
         var o = arguments[1] || {}; o['mode'] = 'toggle';
         return this.effect.apply(this, [arguments[0], o, arguments[2] || o.duration, arguments[3] || o.callback]);
