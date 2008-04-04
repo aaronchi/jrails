@@ -1,6 +1,9 @@
 module ActionView
   module Helpers
     module PrototypeHelper
+      unless const_defined? :JQCALLBACKS
+        JQCALLBACKS = Set.new([ :beforeSend, :complete, :error, :success ] + (100..599).to_a)
+      end
       
       def periodically_call_remote(options = {})
         frequency = options[:frequency] || 10 # every ten seconds by default
@@ -74,10 +77,8 @@ module ActionView
         url_options = options[:url]
         url_options = url_options.merge(:escape => false) if url_options.is_a?(Hash)
         js_options['url'] = "'#{url_for(url_options)}'"
-        js_options['beforeSend'] = "function(xhr) {xhr.setRequestHeader('Accept', 'text/javascript, text/html, application/xml, text/xml, */*')}"
         js_options['async'] = options[:type] != :synchronous        
-        js_options['type'] = options[:method] ? method_option_to_s(options[:method]) : ( options[:form] ? "'post'" : nil )
-        js_options['dataType'] = options[:script].nil? ? (options[:update].nil? ? "'script'" : "'html'") : (options[:script] == false ? "'html'" : "'script'")
+        js_options['type'] = method_option_to_s(options[:method]) if options[:method]
         
         if options[:form]
           js_options['data'] = "$.param($(this).serializeArray())"
@@ -96,7 +97,7 @@ module ActionView
           js_options['data'] << "#{request_forgery_protection_token}=' + encodeURIComponent('#{escape_javascript form_authenticity_token}')"
         end
       
-        options_for_javascript(js_options.reject {|key, value| value.nil?})
+        options_for_javascript(js_options)
       end
       
       def build_update(options)
@@ -126,11 +127,16 @@ module ActionView
       
       def build_callbacks(options)
         callbacks = {}
+        options[:beforeSend] = "function(xhr) {xhr.setRequestHeader('Accept', 'text/javascript, text/html, application/xml, text/xml, */*')};"
+        [:uninitialized,:loading,:loaded].each do |key|
+          options[:beforeSend] << options.delete(key) if options[key]
+        end
+        options[:error] = options.delete(:failure)
         if options[:update]
           options[:complete] = build_update(options) << (options[:complete] ? options[:complete] : '')
         end
         options.each do |callback, code|
-          if CALLBACKS.include?(callback)
+          if JQCALLBACKS.include?(callback)
             callbacks[callback] = "function(request){#{code}}"
           end
         end

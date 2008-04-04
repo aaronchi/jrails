@@ -1,5 +1,6 @@
-﻿SVN
-* better support for ajax form calls
+﻿SVN (04 Apr 2008)
+* Add support for prototype AJAX callbacks
+* better support for AJAX form calls
 
 0.3.0 (22 Feb 2008)
 * updated to jquery-fx 1.0b and jquery-ui 1.5b
