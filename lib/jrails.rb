@@ -131,7 +131,7 @@ module ActionView
         [:uninitialized,:loading,:loaded].each do |key|
           options[:beforeSend] << options.delete(key) if options[key]
         end
-        options[:error] = options.delete(:failure)
+        options[:error] = options.delete(:failure) if options[:failure]
         if options[:update]
           options[:complete] = build_update(options) << (options[:complete] ? options[:complete] : '')
         end
