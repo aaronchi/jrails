@@ -3,7 +3,10 @@ module ActionView
     module PrototypeHelper
       unless const_defined? :JQCALLBACKS
         JQCALLBACKS = Set.new([ :beforeSend, :complete, :error, :success ] + (100..599).to_a)
-      end
+        AJAX_OPTIONS = Set.new([ :before, :after, :condition, :url,
+                         :asynchronous, :method, :insertion, :position,
+                         :form, :with, :update, :script ]).merge(JQCALLBACKS)
+        end
       
       def periodically_call_remote(options = {})
         frequency = options[:frequency] || 10 # every ten seconds by default
@@ -227,47 +230,48 @@ module ActionView
         
       end
       
-      def sortable_element_js(element_id, options = {})
-        #options[:with]     ||= "Sortable.serialize(#{element_id.to_json})"
-        #options[:onUpdate] ||= "function(){" + remote_function(options) + "}"
-        #options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
-        
+      def sortable_element_js(element_id, options = {}) #:nodoc:
         #convert similar attributes
         options[:items] = options[:only] if options[:only]
-        options[:hoverClass] = options[:hoverclass] if options[:hoverclass]
         
-        # quoted attributes
-        [:hoverClass].each do |option|
+        if options[:onUpdate] || options[:url]
+          options[:with] ||= "$(this).sortable('serialize')"
+          options[:onUpdate] ||= "function(){" + remote_function(options) + "}"
+        end
+        
+        options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
+        options[:update] = options.delete(:onUpdate) if options[:onUpdate]
+        
+        [:handle].each do |option|
           options[option] = "'#{options[option]}'" if options[option]
         end
         
-        # array attributes
+        options[:containment] = array_or_string_for_javascript(options[:containment]) if options[:containment]
         options[:items] = array_or_string_for_javascript(options[:items]) if options[:items]
-        
-        options.delete_if { |key, value| [:only, :tag, :overlap, :hoverclass].include?(key) }
-        
-        "$(\"##{element_id}\").sortable(#{options_for_javascript(options) unless options.empty? });"
+  
+        %($("##{element_id}").sortable(#{options_for_javascript(options)});)
       end
       
       def draggable_element_js(element_id, options = {})
-        "$(\"##{element_id}\").draggable(#{options_for_javascript(options) unless options.empty? });"
+        %($("##{element_id}").draggable(#{options_for_javascript(options)});)
       end
       
       def drop_receiving_element_js(element_id, options = {})
+        #convert similar options
+        options[:hoverClass] = options.delete(:hoverclass) if options[:hoverclass]
+        options[:drop] = options.delete(:onDrop) if options[:onDrop]
         
-        options[:hoverClass] = options[:hoverclass] if options[:hoverclass]
-        options[:drop] = options[:onDrop] if options[:onDrop]
+        if options[:drop] || options[:url]
+          options[:with] ||= "'id=' + encodeURIComponent($(ui.draggable).clone().attr('id'))"
+          options[:drop] ||= "function(ev, ui){" + remote_function(options) + "}"
+        end
         
-        options[:with]     ||= "'id=' + encodeURIComponent(element.id)"
-        options[:drop]   ||= "function(element){" + remote_function(options) + "}"
         options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
-        
+
         options[:accept] = array_or_string_for_javascript(options[:accept]) if options[:accept]    
         options[:hoverClass] = "'#{options[:hoverClass]}'" if options[:hoverClass]
         
-        options.delete_if { |key, value| [:hoverclass].include?(key) }
-        
-        "$(\"##{element_id}\").droppable(#{options_for_javascript(options) unless options.empty? });"
+        %($("##{element_id}").droppable(#{options_for_javascript(options)});)
       end
       
     end

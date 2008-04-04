@@ -1,4 +1,5 @@
 ﻿SVN (04 Apr 2008)
+* Better support for droppables, sortables
 * Add support for prototype AJAX callbacks
 * better support for AJAX form calls
 
