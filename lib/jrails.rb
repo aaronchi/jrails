@@ -82,6 +82,7 @@ module ActionView
         js_options['url'] = "'#{url_for(url_options)}'"
         js_options['async'] = options[:type] != :synchronous        
         js_options['type'] = method_option_to_s(options[:method]) if options[:method]
+        js_options['dataType'] = options[:script].nil? ? "'script'" : (options[:script] == false ? "'html'" : "'script'")
         
         if options[:form]
           js_options['data'] = "$.param($(this).serializeArray())"
