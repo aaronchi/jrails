@@ -111,7 +111,7 @@ module ActionView
         insertion = options[:position].to_s.downcase if options[:position]
         insertion = 'append' if insertion == 'bottom'
         insertion = 'prepend' if insertion == 'top'
-        "$('##{options[:update]}').#{insertion}(request.responseText);"
+        "$('##{options[:update]}').#{insertion}(request);"
       end
       
       def build_observer(klass, name, options = {})
@@ -140,7 +140,7 @@ module ActionView
         options.delete(:beforeSend) if options[:beforeSend].blank?
         options[:error] = options.delete(:failure) if options[:failure]
         if options[:update]
-          options[:complete] = build_update(options) << (options[:complete] ? options[:complete] : '')
+          options[:success] = build_update(options) << options[:success] if options[:success]
         end
         options.each do |callback, code|
           if JQCALLBACKS.include?(callback)
