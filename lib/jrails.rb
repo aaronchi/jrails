@@ -140,7 +140,7 @@ module ActionView
         options.delete(:beforeSend) if options[:beforeSend].blank?
         options[:error] = options.delete(:failure) if options[:failure]
         if options[:update]
-          options[:success] = build_update(options) << options[:success] if options[:success]
+          options[:success] = build_update(options) << (options[:success] ? options[:success] : '')
         end
         options.each do |callback, code|
           if JQCALLBACKS.include?(callback)
