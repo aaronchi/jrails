@@ -132,7 +132,7 @@ module ActionView
         callbacks = {}
         options[:beforeSend] = "function(xhr) {xhr.setRequestHeader('Accept', 'text/javascript, text/html, application/xml, text/xml, */*')};"
         [:uninitialized,:loading,:loaded].each do |key|
-          options[:beforeSend] << options.delete(key) if options[key]
+          options[:beforeSend] << (options[key].last == ';' ? options.delete(key) : options.delete(key) << ';') if options[key]
         end
         options[:error] = options.delete(:failure) if options[:failure]
         if options[:update]
