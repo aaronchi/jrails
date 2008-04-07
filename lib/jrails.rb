@@ -130,10 +130,11 @@ module ActionView
       
       def build_callbacks(options)
         callbacks = {}
-        options[:beforeSend] = "function(xhr) {xhr.setRequestHeader('Accept', 'text/javascript, text/html, application/xml, text/xml, */*')};"
+        options[:beforeSend] = '';
         [:uninitialized,:loading,:loaded].each do |key|
           options[:beforeSend] << (options[key].last == ';' ? options.delete(key) : options.delete(key) << ';') if options[key]
         end
+        options.delete(:beforeSend) if options[:beforeSend].blank?
         options[:error] = options.delete(:failure) if options[:failure]
         if options[:update]
           options[:complete] = build_update(options) << (options[:complete] ? options[:complete] : '')
