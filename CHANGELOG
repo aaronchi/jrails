@@ -1,4 +1,6 @@
-﻿SVN (04 Apr 2008)
+﻿SVN (26 may 2008)
+* additional support for update/delete methods
+* support for success/failure hash
 * setRequestHeader now gets called globally
 * Better support for droppables, sortables
 * Add support for prototype AJAX callbacks
