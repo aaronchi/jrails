@@ -5,7 +5,7 @@
 	$.extend($.effects, {
 		save: function(el, set) {
 			for(var i=0;i<set.length;i++) {
-				if(set[i] !== null) $.data(el[0], "ec.storage."+set[i], el.css(set[i]));
+				if(set[i] !== null) $.data(el[0], "ec.storage."+set[i], el[0].style[set[i]]);
 			}
 		},
 		restore: function(el, set) {
@@ -44,8 +44,8 @@
 				wrapper.css({position: 'relative'});
 				el.css({position: 'relative'});
 			} else {
-				var top = parseInt(el.css('top'), 10); if (top.constructor != Number) top = 'auto';
-				var left = parseInt(el.css('left'), 10); if (left.constructor != Number) left = 'auto';
+				var top = parseInt(el.css('top'), 10); if(isNaN(top)) top = 'auto';
+				var left = parseInt(el.css('left'), 10); if(isNaN(top)) left = 'auto';
 				wrapper.css({ position: el.css('position'), top: top, left: left, zIndex: el.css('z-index') }).show();
 				el.css({position: 'relative', top:0, left:0});
 			}
@@ -302,7 +302,7 @@
  * 
  * Open source under the BSD License. 
  * 
- * Copyright Â© 2008 George McGinley Smith
+ * Copyright © 2008 George McGinley Smith
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -471,7 +471,7 @@ jQuery.extend( jQuery.easing,
  * 
  * Open source under the BSD License. 
  * 
- * Copyright Â© 2001 Robert Penner
+ * Copyright © 2001 Robert Penner
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -528,7 +528,7 @@ jQuery.extend( jQuery.easing,
 			wrapper.animate(animation, o.duration, o.options.easing, function() {
 				if(mode == 'hide') el.hide(); // Hide
 				$.effects.restore(el, props); $.effects.removeWrapper(el); // Restore
-				if(o.callback) o.callback.apply(this, arguments); // Callback
+				if(o.callback) o.callback.apply(el[0], arguments); // Callback
 				el.dequeue();
 			});
 			
@@ -716,7 +716,7 @@ jQuery.extend( jQuery.easing,
 			.animate(animation2, o.duration / 2, o.options.easing, function() {
 				if(mode == 'hide') el.hide(); // Hide
 				$.effects.restore(el, props); $.effects.removeWrapper(el); // Restore
-				if(o.callback) o.callback.apply(this, arguments); // Callback
+				if(o.callback) o.callback.apply(el[0], arguments); // Callback
 				el.dequeue();
 			});
 			
@@ -738,13 +738,14 @@ jQuery.extend( jQuery.easing,
 			// Set options
 			var mode = $.effects.setMode(el, o.options.mode || 'show'); // Set Mode
 			var color = o.options.color || "#ffff99"; // Default highlight color
+			var oldColor = el.css("backgroundColor");
 			
 			// Adjust
 			$.effects.save(el, props); el.show(); // Save & Show
 			el.css({backgroundImage: 'none', backgroundColor: color}); // Shift
 			
 			// Animation
-			var animation = {backgroundColor: $.data(this, "ec.storage.backgroundColor")};
+			var animation = {backgroundColor: oldColor };
 			if (mode == "hide") animation['opacity'] = 0;
 			
 			// Animate
@@ -816,9 +817,10 @@ jQuery.extend( jQuery.easing,
 			var el = $(this);
 		
 			// Set options
+			var options = $.extend(true, {}, o);
 			var mode = $.effects.setMode(el, o.options.mode || 'hide'); // Set Mode
 			var percent = parseInt(o.options.percent) || 150; // Set default puff percent
-			o.options.fade = true; // It's not a puff if it doesn't fade! :)
+			options.fade = true; // It's not a puff if it doesn't fade! :)
 			var original = {height: el.height(), width: el.width()}; // Save original
 		
 			// Adjust
@@ -826,12 +828,12 @@ jQuery.extend( jQuery.easing,
 			el.from = (mode == 'hide') ? original : {height: original.height * factor, width: original.width * factor};
 		
 			// Animation
-			o.options.from = el.from;
-			o.options.percent = (mode == 'hide') ? percent : 100;
-			o.options.mode = mode;
+			options.from = el.from;
+			options.percent = (mode == 'hide') ? percent : 100;
+			options.mode = mode;
 		
 			// Animate
-			el.effect('scale', o.options, o.duration, o.callback);
+			el.effect('scale', options, o.duration, o.callback);
 			el.dequeue();
 		});
 		
@@ -845,13 +847,14 @@ jQuery.extend( jQuery.easing,
 			var el = $(this);
 
 			// Set options
+			var options = $.extend(true, {}, o);
 			var mode = $.effects.setMode(el, o.options.mode || 'effect'); // Set Mode
 			var percent = parseInt(o.options.percent) || (parseInt(o.options.percent) == 0 ? 0 : (mode == 'hide' ? 0 : 100)); // Set default scaling percent
 			var direction = o.options.direction || 'both'; // Set default axis
 			var origin = o.options.origin; // The origin of the scaling
 			if (mode != 'effect') { // Set default origin and restore for show/hide
 				origin = origin || ['middle','center'];
-				o.options.restore = true;
+				options.restore = true;
 			}
 			var original = {height: el.height(), width: el.width()}; // Save original
 			el.from = o.options.from || (mode == 'show' ? {height: 0, width: 0} : original); // Default from state
@@ -875,10 +878,10 @@ jQuery.extend( jQuery.easing,
 			};
 		
 			// Animation
-			o.options.from = el.from; o.options.to = el.to;
+			options.from = el.from; options.to = el.to; options.mode = mode;
 		
 			// Animate
-			el.effect('size', o.options, o.duration, o.callback);
+			el.effect('size', options, o.duration, o.callback);
 			el.dequeue();
 		});
 		
@@ -1069,24 +1072,24 @@ jQuery.extend( jQuery.easing,
 			// Set options
 			var mode = $.effects.setMode(el, o.options.mode || 'effect'); // Set Mode
 			var target = $(o.options.to); // Find Target
-			var position = el.position();
-		var transfer = $('<div id="fxTransfer"></div>').appendTo(document.body)
+			var position = el.offset();
+		var transfer = $('<div class="ui-effects-transfer"></div>').appendTo(document.body);
 			
 			// Set target css
 			transfer.addClass(o.options.className);
 			transfer.css({
-				top: position['top'],
-				left: position['left'],
-				height: el.outerHeight({margin:true}) - parseInt(transfer.css('borderTopWidth')) - parseInt(transfer.css('borderBottomWidth')),
-				width: el.outerWidth({margin:true}) - parseInt(transfer.css('borderLeftWidth')) - parseInt(transfer.css('borderRightWidth')),
+				top: position.top,
+				left: position.left,
+				height: el.outerHeight(true) - parseInt(transfer.css('borderTopWidth')) - parseInt(transfer.css('borderBottomWidth')),
+				width: el.outerWidth(true) - parseInt(transfer.css('borderLeftWidth')) - parseInt(transfer.css('borderRightWidth')),
 				position: 'absolute'
 			});
 			
 			// Animation
-			position = target.position();
+			position = target.offset();
 			animation = {
-				top: position['top'],
-				left: position['left'],
+				top: position.top,
+				left: position.top,
 				height: target.outerHeight() - parseInt(transfer.css('borderTopWidth')) - parseInt(transfer.css('borderBottomWidth')),
 				width: target.outerWidth() - parseInt(transfer.css('borderLeftWidth')) - parseInt(transfer.css('borderRightWidth'))
 			};
@@ -1094,7 +1097,7 @@ jQuery.extend( jQuery.easing,
 			// Animate
 			transfer.animate(animation, o.duration, o.options.easing, function() {
 				transfer.remove(); // Remove div
-				if(o.callback) o.callback.apply(this, arguments); // Callback
+				if(o.callback) o.callback.apply(el[0], arguments); // Callback
 				el.dequeue();
 			}); 
 			
