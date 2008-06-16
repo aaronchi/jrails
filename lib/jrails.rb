@@ -200,6 +200,15 @@ module ActionView
 			def replace(*options_for_render)
 				call 'replaceWith', @generator.send(:render, *options_for_render)
 			end
+			
+			def value()
+				call 'val()'
+			end
+
+			def value=(value)
+				call 'val', value
+			end
+			
 		end
 		
 		class JavaScriptElementCollectionProxy < JavaScriptCollectionProxy #:nodoc:\
