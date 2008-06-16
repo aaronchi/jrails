@@ -314,7 +314,7 @@ module ActionView
 				options[:drop] = options.delete(:onDrop) if options[:onDrop]
 				
 				if options[:drop] || options[:url]
-					options[:with] ||= "'id=' + encodeURIComponent(#{JQUERY_VAR}(ui.draggable).clone().attr('id'))"
+					options[:with] ||= "'id=' + encodeURIComponent(#{JQUERY_VAR}(ui.draggable).attr('id'))"
 					options[:drop] ||= "function(ev, ui){" + remote_function(options) + "}"
 				end
 				
