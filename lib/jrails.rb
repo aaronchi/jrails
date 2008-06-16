@@ -93,7 +93,7 @@ module ActionView
 				if options[:form]
 					js_options['data'] = "#{JQUERY_VAR}.param(#{JQUERY_VAR}(this).serializeArray())"
 				elsif options[:submit]
-					js_options['data'] = "#{JQUERY_VAR}(\"##{options[:submit]}\").serializeArray()"
+					js_options['data'] = "#{JQUERY_VAR}(\"##{options[:submit]} :input\").serialize()"
 				elsif options[:with]
 					js_options['data'] = options[:with].gsub("Form.serialize(this.form)","#{JQUERY_VAR}.param(#{JQUERY_VAR}(this.form).serializeArray())")
 				end
