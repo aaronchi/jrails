@@ -295,7 +295,7 @@ module ActionView
 				options[:update] = options.delete(:onUpdate) if options[:onUpdate]
 				
 				[:handle].each do |option|
-					options[option] = "'#{options[option]}'" if options[option]
+					options[option] = %(#{JQUERY_VAR}(".#{options[option]}")) if options[option]
 				end
 				
 				options[:containment] = array_or_string_for_javascript(options[:containment]) if options[:containment]
