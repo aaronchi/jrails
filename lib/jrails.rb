@@ -188,6 +188,11 @@ module ActionView
 		end
 		
 		class JavaScriptElementProxy < JavaScriptProxy #:nodoc:
+			
+			unless const_defined? :JQUERY_VAR
+				JQUERY_VAR = ActionView::Helpers::PrototypeHelper::JQUERY_VAR
+			end
+			
 			def initialize(generator, id)
 				@id = id
 				super(generator, "#{JQUERY_VAR}(\"##{id}\")")
