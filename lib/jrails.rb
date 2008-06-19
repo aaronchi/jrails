@@ -234,7 +234,7 @@ module ActionView
 			
 			unless const_defined? :SCRIPTACULOUS_EFFECTS
 				SCRIPTACULOUS_EFFECTS = {
-					:appear => {:method => 'fade', :options => {:mode => 'show'}},
+					:appear => {:method => 'fadeIn', :options => {}},
 					:blind_down => {:method => 'blind', :options => {:direction => 'vertical', :mode => 'show'}},
 					:blind_up => {:method => 'blind', :options => {:direction => 'vertical', :mode => 'hide'}},
 					:blind_right => {:method => 'blind', :options => {:direction => 'horizontal', :mode => 'show'}},
@@ -243,6 +243,7 @@ module ActionView
 					:bounce_out => {:method => 'bounce', :options => {:direction => 'up', :mode => 'hide'}},
 					:drop_in => {:method => 'drop', :options => {:direction => 'up', :mode => 'show'}},
 					:drop_out => {:method => 'drop', :options => {:direction => 'down', :mode => 'hide'}},
+					:fade => {:method => 'fadeOut', :options => {}},
 					:fold_in => {:method => 'fold', :options => {:mode => 'hide'}},
 					:fold_out => {:method => 'fold', :options => {:mode => 'show'}},
 					:grow => {:method => 'scale', :options => {:mode => 'show'}},
@@ -280,10 +281,16 @@ module ActionView
 				#if TOGGLE_EFFECTS.include? name.to_sym
 				#  "Effect.toggle(#{element},'#{name.to_s.gsub(/^toggle_/,'')}',#{options_for_javascript(js_options)});"
 				
-				javascript = "#{JQUERY_VAR}(\"##{element_id}\").effect(\"#{name.to_s.downcase}\""
-				javascript << ",#{options_for_javascript(js_options)}" unless speed.nil? && js_options.empty?
-				javascript << ",#{speed}" unless speed.nil?
-				javascript << ")"
+				if ['fadeIn','fadeOut'].include?(name)
+					javascript = "#{JQUERY_VAR}(\"##{element_id}\").#{name}("
+					javascript << "#{speed}" unless speed.nil?
+					javascript << ")"
+				else
+					javascript = "#{JQUERY_VAR}(\"##{element_id}\").effect(\"#{name}\""
+					javascript << ",#{options_for_javascript(js_options)}" unless speed.nil? && js_options.empty?
+					javascript << ",#{speed}" unless speed.nil?
+					javascript << ")"
+				end
 				
 			end
 			
