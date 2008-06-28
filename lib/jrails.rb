@@ -296,7 +296,28 @@ module ActionView
 			
 			def sortable_element_js(element_id, options = {}) #:nodoc:
 				#convert similar attributes
-				options[:items] = options[:only] if options[:only]
+				options[:handle] = ".#{options[:handle]}" if options[:handle]
+				if options[:tag] || options[:only]
+					options[:items] = "> "
+					options[:items] << options.delete(:tag) if options[:tag]
+					options[:items] << ".#{options.delete(:only)}" if options[:only]
+				end
+				options[:connectWith] = options.delete(:containment).map {|x| "##{x}"} if options[:containment]
+				options[:dropOnEmpty] = false unless options[:dropOnEmpty]
+				options[:helper] = "'clone'" if options[:ghosting] == true
+				options[:axis] = case options.delete(:constraint)
+					when "vertical"
+						"y"
+					when "horizontal"
+						"x"
+					when false
+						nil
+					when nil
+						"y"
+				end
+				options.delete(:axis) if options[:axis].nil?
+				options.delete(:overlap)
+				options.delete(:ghosting)
 				
 				if options[:onUpdate] || options[:url]
 					options[:with] ||= "#{JQUERY_VAR}(this).sortable('serialize')"
@@ -306,13 +327,12 @@ module ActionView
 				options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
 				options[:update] = options.delete(:onUpdate) if options[:onUpdate]
 				
-				[:handle].each do |option|
-					options[option] = %(#{JQUERY_VAR}(".#{options[option]}")) if options[option]
+				[:items, :axis, :handle].each do |option|
+					options[option] = "'#{options[option]}'" if options[option]
 				end
 				
-				options[:containment] = array_or_string_for_javascript(options[:containment]) if options[:containment]
-				options[:items] = array_or_string_for_javascript(options[:items]) if options[:items]
-	
+				options[:connectWith] = array_or_string_for_javascript(options[:connectWith]) if options[:connectWith]
+				
 				%(#{JQUERY_VAR}("##{element_id}").sortable(#{options_for_javascript(options)});)
 			end
 			
