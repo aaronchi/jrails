@@ -1,4 +1,8 @@
-﻿0.4.0 (16 June 2008)
+﻿SVN
+* better support for sortable_element
+* updated to jquery-ui 1.5.1
+
+0.4.0 (16 June 2008)
 * updated to jquery-ui 1.5 & merged js into single file
 * Added jQuery.noConflict support
 * support for value/val
