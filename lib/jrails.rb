@@ -228,33 +228,32 @@ module ActionView
 				JQUERY_VAR = ActionView::Helpers::PrototypeHelper::JQUERY_VAR
 			end
 			
-			unless const_defined? :TOGGLE_EFFECTS
-				TOGGLE_EFFECTS = [:toggle_appear, :toggle_slide, :toggle_blind]
-			end
-			
 			unless const_defined? :SCRIPTACULOUS_EFFECTS
 				SCRIPTACULOUS_EFFECTS = {
-					:appear => {:method => 'fadeIn', :options => {}},
-					:blind_down => {:method => 'blind', :options => {:direction => 'vertical', :mode => 'show'}},
-					:blind_up => {:method => 'blind', :options => {:direction => 'vertical', :mode => 'hide'}},
-					:blind_right => {:method => 'blind', :options => {:direction => 'horizontal', :mode => 'show'}},
-					:blind_left => {:method => 'blind', :options => {:direction => 'horizontal', :mode => 'hide'}},
-					:bounce_in => {:method => 'bounce', :options => {:direction => 'up', :mode => 'show'}},
-					:bounce_out => {:method => 'bounce', :options => {:direction => 'up', :mode => 'hide'}},
-					:drop_in => {:method => 'drop', :options => {:direction => 'up', :mode => 'show'}},
-					:drop_out => {:method => 'drop', :options => {:direction => 'down', :mode => 'hide'}},
-					:fade => {:method => 'fadeOut', :options => {}},
-					:fold_in => {:method => 'fold', :options => {:mode => 'hide'}},
-					:fold_out => {:method => 'fold', :options => {:mode => 'show'}},
-					:grow => {:method => 'scale', :options => {:mode => 'show'}},
-					:shrink => {:method => 'scale', :options => {:mode => 'hide'}},
-					:slide_down => {:method => 'slide', :options => {:direction => 'up', :mode => 'show'}},
-					:slide_up => {:method => 'slide', :options => {:direction => 'up', :mode => 'hide'}},
-					:slide_right => {:method => 'slide', :options => {:direction => 'left', :mode => 'show'}},
-					:slide_left => {:method => 'slide', :options => {:direction => 'left', :mode => 'hide'}},
-					:squish => {:method => 'scale', :options => {:origin => '["top","left"]', :mode => 'hide'}},
-					:switch_on => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'show'}},
-					:switch_off => {:method => 'clip', :options => {:direction => 'vertical', :mode => 'hide'}}
+					:appear => {:method => 'fadeIn'},
+					:blind_down => {:method => 'blind', :mode => 'show', :options => {:direction => 'vertical'}},
+					:blind_up => {:method => 'blind', :mode => 'hide', :options => {:direction => 'vertical'}},
+					:blind_right => {:method => 'blind', :mode => 'show', :options => {:direction => 'horizontal'}},
+					:blind_left => {:method => 'blind', :mode => 'hide', :options => {:direction => 'horizontal'}},
+					:bounce_in => {:method => 'bounce', :mode => 'show', :options => {:direction => 'up'}},
+					:bounce_out => {:method => 'bounce', :mode => 'hide', :options => {:direction => 'up'}},
+					:drop_in => {:method => 'drop', :mode => 'show', :options => {:direction => 'up'}},
+					:drop_out => {:method => 'drop', :mode => 'hide', :options => {:direction => 'down'}},
+					:fade => {:method => 'fadeOut'},
+					:fold_in => {:method => 'fold', :mode => 'hide'},
+					:fold_out => {:method => 'fold', :mode => 'show'},
+					:grow => {:method => 'scale', :mode => 'show'},
+					:shrink => {:method => 'scale', :mode => 'hide'},
+					:slide_down => {:method => 'slide', :mode => 'show', :options => {:direction => 'up'}},
+					:slide_up => {:method => 'slide', :mode => 'hide', :options => {:direction => 'up'}},
+					:slide_right => {:method => 'slide', :mode => 'show', :options => {:direction => 'left'}},
+					:slide_left => {:method => 'slide', :mode => 'hide', :options => {:direction => 'left'}},
+					:squish => {:method => 'scale', :mode => 'hide', :options => {:origin => '["top","left"]'}},
+					:switch_on => {:method => 'clip', :mode => 'show', :options => {:direction => 'vertical'}},
+					:switch_off => {:method => 'clip', :mode => 'hide', :options => {:direction => 'vertical'}},
+					:toggle_appear => {:method => 'fadeToggle'},
+					:toggle_slide => {:method => 'slide', :mode => 'toggle', :options => {:direction => 'up'}},
+					:toggle_blind => {:method => 'blind', :mode => 'toggle', :options => {:direction => 'vertical'}},
 				}
 			end
 			
@@ -264,10 +263,11 @@ module ActionView
 				if SCRIPTACULOUS_EFFECTS.has_key? name.to_sym
 					effect = SCRIPTACULOUS_EFFECTS[name.to_sym]
 					name = effect[:method]
-					js_options = js_options.merge effect[:options]
+					mode = effect[:mode]
+					js_options = js_options.merge(effect[:options]) if effect[:options]
 				end
 				
-				[:color, :direction, :mode].each do |option|
+				[:color, :direction].each do |option|
 					js_options[option] = "\"#{js_options[option]}\"" if js_options[option]
 				end
 				
@@ -278,15 +278,12 @@ module ActionView
 					speed = js_options.delete :speed
 				end
 				
-				#if TOGGLE_EFFECTS.include? name.to_sym
-				#  "Effect.toggle(#{element},'#{name.to_s.gsub(/^toggle_/,'')}',#{options_for_javascript(js_options)});"
-				
-				if ['fadeIn','fadeOut'].include?(name)
+				if ['fadeIn','fadeOut','fadeToggle'].include?(name)
 					javascript = "#{JQUERY_VAR}(\"##{element_id}\").#{name}("
 					javascript << "#{speed}" unless speed.nil?
 					javascript << ")"
 				else
-					javascript = "#{JQUERY_VAR}(\"##{element_id}\").effect(\"#{name}\""
+					javascript = "#{JQUERY_VAR}(\"##{element_id}\").#{mode || 'effect'}(\"#{name}\""
 					javascript << ",#{options_for_javascript(js_options)}" unless speed.nil? && js_options.empty?
 					javascript << ",#{speed}" unless speed.nil?
 					javascript << ")"
