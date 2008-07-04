@@ -319,6 +319,7 @@ module ActionView
 					options[:items] << ".#{options.delete(:only)}" if options[:only]
 				end
 				options[:connectWith] = options.delete(:containment).map {|x| "##{x}"} if options[:containment]
+				options[:containment] = options.delete(:container) if options[:container]
 				options[:dropOnEmpty] = false unless options[:dropOnEmpty]
 				options[:helper] = "'clone'" if options[:ghosting] == true
 				options[:axis] = case options.delete(:constraint)
@@ -344,7 +345,7 @@ module ActionView
 				options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
 				options[:update] = options.delete(:onUpdate) if options[:onUpdate]
 				
-				[:items, :axis, :handle].each do |option|
+				[:items, :axis, :handle, :containment].each do |option|
 					options[option] = "'#{options[option]}'" if options[option]
 				end
 				
