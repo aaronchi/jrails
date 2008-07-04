@@ -1,6 +1,25 @@
 module ActionView
 	module Helpers
 		
+		module JavascriptHelper
+			
+			# This function can be used to render rjs inline
+			#
+			#	<%= javascript_function do |page|
+			#		page.replace_html :list, :partial => 'list', :object => @list
+			#	end %>
+			#
+			def javascript_function(*args, &block)
+				html_options = args.extract_options!
+				function = args[0] || ''
+
+				html_options.symbolize_keys!
+				function = update_page(&block) if block_given?
+				javascript_tag(function)
+			end
+
+		end
+		
 		module PrototypeHelper
 
 			unless const_defined? :JQUERY_VAR
