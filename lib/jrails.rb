@@ -19,7 +19,7 @@ module ActionView
 			end
 			
 			def jquery_id(id)
-				id.to_s.count('.# ') == 0 ? "##{id}" : id
+				id.to_s.count('.#> ') == 0 ? "##{id}" : id
 			end
 					
 			def jquery_ids(ids)
@@ -104,7 +104,7 @@ module ActionView
 					end
 					
 					def jquery_id(id)
-						id.to_s.count('.# ') == 0 ? "##{id}" : id
+						id.to_s.count('.#> ') == 0 ? "##{id}" : id
 					end
 					
 					def jquery_ids(ids)
@@ -229,7 +229,7 @@ module ActionView
 			end
 			
 			def initialize(generator, id)
-				id = id.to_s.count('.# ') == 0 ? "##{id}" : id
+				id = id.to_s.count('.#> ') == 0 ? "##{id}" : id
 				@id = id
 				super(generator, "#{JQUERY_VAR}(\"#{id}\")")
 			end
