@@ -17,11 +17,19 @@ module ActionView
 				function = update_page(&block) if block_given?
 				javascript_tag(function)
 			end
+			
+			def jquery_id(id)
+				id.to_s.count('.# ') == 0 ? "##{id}" : id
+			end
+					
+			def jquery_ids(ids)
+				Array(ids).map{|id| jquery_id(id)}.join(',')
+			end
 
 		end
 		
 		module PrototypeHelper
-
+			
 			unless const_defined? :JQUERY_VAR
 				JQUERY_VAR = '$'
 			end
@@ -68,7 +76,7 @@ module ActionView
 						insertion = position.to_s.downcase
 						insertion = 'append' if insertion == 'bottom'
 						insertion = 'prepend' if insertion == 'top'
-						call "#{JQUERY_VAR}(\"##{id}\").#{insertion}", render(*options_for_render)
+						call "#{JQUERY_VAR}(\"#{jquery_id(id)}\").#{insertion}", render(*options_for_render)
 					end
 					
 					def replace_html(id, *options_for_render)
@@ -76,23 +84,31 @@ module ActionView
 					end
 					
 					def replace(id, *options_for_render)
-						call "#{JQUERY_VAR}(\"##{id}\").replaceWith", render(*options_for_render)
+						call "#{JQUERY_VAR}(\"#{jquery_id(id)}\").replaceWith", render(*options_for_render)
 					end
 					
 					def remove(*ids)
-						call "#{JQUERY_VAR}(\"##{ids.join(',#')}\").remove"
+						call "#{JQUERY_VAR}(\"#{jquery_ids(ids)}\").remove"
 					end
 					
 					def show(*ids)
-						call "#{JQUERY_VAR}(\"##{ids.join(',#')}\").show"
+						call "#{JQUERY_VAR}(\"#{jquery_ids(ids)}\").show"
 					end
 					
 					def hide(*ids)
-						call "#{JQUERY_VAR}(\"##{ids.join(',#')}\").hide"
+						call "#{JQUERY_VAR}(\"#{jquery_ids(ids)}\").hide"
 					end
 
 					def toggle(*ids)
-						call "#{JQUERY_VAR}(\"##{ids.join(',#')}\").toggle"
+						call "#{JQUERY_VAR}(\"#{jquery_ids(ids)}\").toggle"
+					end
+					
+					def jquery_id(id)
+						id.to_s.count('.# ') == 0 ? "##{id}" : id
+					end
+					
+					def jquery_ids(ids)
+						Array(ids).map{|id| jquery_id(id)}.join(',')
 					end
 					
 				end
@@ -143,12 +159,12 @@ module ActionView
 			
 			def build_update_for_success(html_id, insertion=nil)
 				insertion = build_insertion(insertion)
-				"#{JQUERY_VAR}('##{html_id}').#{insertion}(request);"
+				"#{JQUERY_VAR}('#{jquery_id(html_id)}').#{insertion}(request);"
 			end
 
 			def build_update_for_error(html_id, insertion=nil)
 				insertion = build_insertion(insertion)
-				"#{JQUERY_VAR}('##{html_id}').#{insertion}(request.responseText);"
+				"#{JQUERY_VAR}('#{jquery_id(html_id)}').#{insertion}(request.responseText);"
 			end
 
 			def build_insertion(insertion)
@@ -166,7 +182,7 @@ module ActionView
 				end
 
 				callback = options[:function] || remote_function(options)
-				javascript  = "#{JQUERY_VAR}(\"##{name}\").delayedObserver("
+				javascript  = "#{JQUERY_VAR}('#{jquery_id(name)}').delayedObserver("
 				javascript << "#{options[:frequency] || 0}, "
 				javascript << "function(element, value) {"
 				javascript << "#{callback}}"
@@ -213,8 +229,9 @@ module ActionView
 			end
 			
 			def initialize(generator, id)
+				id = id.to_s.count('.# ') == 0 ? "##{id}" : id
 				@id = id
-				super(generator, "#{JQUERY_VAR}(\"##{id}\")")
+				super(generator, "#{JQUERY_VAR}(\"#{id}\")")
 			end
 			
 			def replace_html(*options_for_render)
@@ -267,7 +284,7 @@ module ActionView
 					:slide_up => {:method => 'slide', :mode => 'hide', :options => {:direction => 'up'}},
 					:slide_right => {:method => 'slide', :mode => 'show', :options => {:direction => 'left'}},
 					:slide_left => {:method => 'slide', :mode => 'hide', :options => {:direction => 'left'}},
-					:squish => {:method => 'scale', :mode => 'hide', :options => {:origin => '["top","left"]'}},
+					:squish => {:method => 'scale', :mode => 'hide', :options => {:origin => "['top','left']"}},
 					:switch_on => {:method => 'clip', :mode => 'show', :options => {:direction => 'vertical'}},
 					:switch_off => {:method => 'clip', :mode => 'hide', :options => {:direction => 'vertical'}},
 					:toggle_appear => {:method => 'fadeToggle'},
@@ -287,7 +304,7 @@ module ActionView
 				end
 				
 				[:color, :direction].each do |option|
-					js_options[option] = "\"#{js_options[option]}\"" if js_options[option]
+					js_options[option] = "'#{js_options[option]}'" if js_options[option]
 				end
 				
 				if js_options.has_key? :duration
@@ -298,14 +315,14 @@ module ActionView
 				end
 				
 				if ['fadeIn','fadeOut','fadeToggle'].include?(name)
-					javascript = "#{JQUERY_VAR}(\"##{element_id}\").#{name}("
+					javascript = "#{JQUERY_VAR}('#{jquery_id(element_id)}').#{name}("
 					javascript << "#{speed}" unless speed.nil?
-					javascript << ")"
+					javascript << ");"
 				else
-					javascript = "#{JQUERY_VAR}(\"##{element_id}\").#{mode || 'effect'}(\"#{name}\""
+					javascript = "#{JQUERY_VAR}('#{jquery_id(element_id)}').#{mode || 'effect'}('#{name}'"
 					javascript << ",#{options_for_javascript(js_options)}" unless speed.nil? && js_options.empty?
 					javascript << ",#{speed}" unless speed.nil?
-					javascript << ")"
+					javascript << ");"
 				end
 				
 			end
@@ -351,11 +368,11 @@ module ActionView
 				
 				options[:connectWith] = array_or_string_for_javascript(options[:connectWith]) if options[:connectWith]
 				
-				%(#{JQUERY_VAR}("##{element_id}").sortable(#{options_for_javascript(options)});)
+				%(#{JQUERY_VAR}('#{jquery_id(element_id)}').sortable(#{options_for_javascript(options)});)
 			end
 			
 			def draggable_element_js(element_id, options = {})
-				%(#{JQUERY_VAR}("##{element_id}").draggable(#{options_for_javascript(options)});)
+				%(#{JQUERY_VAR}("#{jquery_id(element_id)}").draggable(#{options_for_javascript(options)});)
 			end
 			
 			def drop_receiving_element_js(element_id, options = {})
@@ -373,7 +390,7 @@ module ActionView
 				options[:accept] = array_or_string_for_javascript(options[:accept]) if options[:accept]    
 				options[:hoverClass] = "'#{options[:hoverClass]}'" if options[:hoverClass]
 				
-				%(#{JQUERY_VAR}("##{element_id}").droppable(#{options_for_javascript(options)});)
+				%(#{JQUERY_VAR}('#{jquery_id(element_id)}').droppable(#{options_for_javascript(options)});)
 			end
 			
 		end
