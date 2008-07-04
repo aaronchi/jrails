@@ -1,4 +1,6 @@
-﻿SVN
+SVN
+* can now use jquery selectors in all functions
+* added javascript_function helper to render inline rjs helpers
 * better support for sortable_element
 * updated to jquery-ui 1.5.1
 
