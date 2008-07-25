@@ -1,7 +1,7 @@
 module ActionView
 	module Helpers
 		
-		module JavascriptHelper
+		module JavaScriptHelper
 			
 			# This function can be used to render rjs inline
 			#
