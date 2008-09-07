@@ -111,89 +111,72 @@
 
 	$.fn.extend({
 		visualEffect : function(o) {
-			return this.effect(o);
+			e = o.replace(/(.)?/, function(m, l) { return l.toUpperCase() }).replace(/\_(.)/g, function(m, l){return l.toUpperCase()});
+			return eval('$(this).'+e+'()');
 		},
 		Appear : function(speed, callback) {
 			return this.fadeIn(speed, callback);
 		},
 		BlindDown : function(speed, callback) {
-			this.show('blind', { direction: 'vertical' }, speed, callback);
-			return this;
+			return this.show('blind', { direction: 'vertical' }, speed, callback);
 		},
 		BlindUp : function(speed, callback) {
-			this.hide('blind', { direction: 'vertical' }, speed, callback); 
-			return this;
+			return this.hide('blind', { direction: 'vertical' }, speed, callback); 
 		},
 		BlindRight : function(speed, callback) {
-			this.show('blind', { direction: 'horizontal' }, speed, callback); 
-			return this;
+			return this.show('blind', { direction: 'horizontal' }, speed, callback); 
 		},
 		BlindLeft : function(speed, callback) {
 			this.hide('blind', { direction: 'horizontal' }, speed, callback); 
 			return this;
 		},
 		DropOut : function(speed, callback) {
-			this.hide('drop', {direction: 'down' }, speed, callback); 
-			return this;
+			return this.hide('drop', {direction: 'down' }, speed, callback); 
 		},
 		DropIn : function(speed, callback) {
-			this.show('drop', { direction: 'up' }, speed, callback); 
-			return this;
+			return this.show('drop', { direction: 'up' }, speed, callback); 
 		},
 		Fade : function(speed, callback) {
 			return this.fadeOut(speed, callback);
 		},
 		Fold : function(speed, callback) {
-			this.hide('fold', {}, speed, callback); 
-			return this;
+			return this.hide('fold', {}, speed, callback); 
 		},
 		FoldOut : function(speed, callback) {
-			this.show('fold', {}, speed, callback); 
-			return this;
+			return this.show('fold', {}, speed, callback); 
 		},
 		Grow : function(speed, callback) {
-			this.show('scale', {}, speed, callback); 
-			return this;
+			return this.show('scale', {}, speed, callback); 
 		},
 		Highlight : function(speed, callback) {
-			this.show('highlight', {}, speed, callback); 
-			return this;
+			return this.show('highlight', {}, speed, callback); 
 		},
 		Puff : function(speed, callback) {
-			this.hide('puff', {}, speed, callback); 
-			return this;
+			return this.hide('puff', {}, speed, callback); 
 		},
 		Pulsate : function(speed, callback) {
-			this.show('pulsate', {}, speed, callback); 
-			return this;
+			return this.show('pulsate', {}, speed, callback); 
 		},
 		Shake : function(speed, callback) {
-			this.show('shake', {}, speed, callback); 
-			return this;
+			return this.show('shake', {}, speed, callback); 
 		},
 		Shrink : function(speed, callback) {
-			this.hide('scale', {}, speed, callback); 
-			return this;
+			return this.hide('scale', {}, speed, callback); 
 		},
 		Squish : function(speed, callback) {
-			this.hide('scale', { origin: ['top', 'left'] }, speed, callback); 
-			return this;
+			return this.hide('scale', { origin: ['top', 'left'] }, speed, callback); 
 		},
 		SlideUp : function(speed, callback) {
-			this.hide('slide', { direction: 'up'}, speed, callback); 
-			return this;
+			return this.hide('slide', { direction: 'up'}, speed, callback); 
 		},
 		SlideDown : function(speed, callback) {
-			this.show('slide', { direction: 'up'}, speed, callback); 
-			return this;
+			return this.show('slide', { direction: 'up'}, speed, callback); 
 		},
 		SwitchOff : function(speed, callback) {
-			this.hide('clip', {}, speed, callback); 
-			return this;
+			return this.hide('clip', {}, speed, callback); 
 		},
 		SwitchOn : function(speed, callback) {
-			this.show('clip', {}, speed, callback); 
-			return this;
+			return this.show('clip', {}, speed, callback); 
 		}
 	});
 })(jQuery);

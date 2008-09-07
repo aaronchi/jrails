@@ -1,4 +1,5 @@
 SVN
+* add support for page[:element_id].visual_effect(:effect) as well as page.visual_effect(:effect, :element_id)
 * added a reset form function to jrails.js (stolen from jquery form)
 * can now use jquery selectors in all functions
 * added javascript_function helper to render inline rjs helpers
