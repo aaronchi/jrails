@@ -134,7 +134,7 @@
 		fade : function(speed, callback) {
 			return this.fadeOut(speed, callback);
 		},
-		fadeToggle = function(speed, callback) {
+		fadeToggle : function(speed, callback) {
 			return this.animate({opacity: 'toggle'}, speed, callback);
 		},
 		fold : function(speed, callback) {
