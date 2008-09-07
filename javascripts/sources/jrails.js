@@ -12,6 +12,26 @@
 	});
 })(jQuery);
 
+
+/*
+*
+* jRails form extras
+* <aaron@ennerchi.com> | http://www.ennerchi.com
+* 
+*/
+
+// reset a form
+(function($) {
+	$.fn.reset = function() {
+		return this.each(function() {
+			// guard against an input with the name of 'reset'
+			// note that IE reports the reset function as an 'object'
+			if (typeof this.reset == 'function' || (typeof this.reset == 'object' && !this.reset.nodeType))
+				this.reset();
+		});
+	};
+})(jQuery);
+
 /*
 *
 * jRails form observer plugin
