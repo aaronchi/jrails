@@ -253,6 +253,11 @@ module ActionView
 		end
 		
 		class JavaScriptElementCollectionProxy < JavaScriptCollectionProxy #:nodoc:\
+			
+			unless const_defined? :JQUERY_VAR
+				JQUERY_VAR = ActionView::Helpers::PrototypeHelper::JQUERY_VAR
+			end
+			
 			def initialize(generator, pattern)
 				super(generator, "#{JQUERY_VAR}(#{pattern.to_json})")
 			end
