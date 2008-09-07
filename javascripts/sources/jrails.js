@@ -98,84 +98,82 @@
 /*
 *
 * jRails visual effects stubs
-* version 0.1
+* version 0.2
 * <aaron@ennerchi.com> | http://www.ennerchi.com
 * 
 */
 
 (function($) {
-	/* Support a fadeToggle */
-	$.fn.fadeToggle = function(speed, easing, callback) {
-		return this.animate({opacity: 'toggle'}, speed, easing, callback);
-	};
-
 	$.fn.extend({
 		visualEffect : function(o) {
-			e = o.replace(/(.)?/, function(m, l) { return l.toUpperCase() }).replace(/\_(.)/g, function(m, l){return l.toUpperCase()});
+			e = o.replace(/\_(.)/g, function(m, l){return l.toUpperCase()});
 			return eval('$(this).'+e+'()');
 		},
-		Appear : function(speed, callback) {
+		appear : function(speed, callback) {
 			return this.fadeIn(speed, callback);
 		},
-		BlindDown : function(speed, callback) {
+		blindDown : function(speed, callback) {
 			return this.show('blind', { direction: 'vertical' }, speed, callback);
 		},
-		BlindUp : function(speed, callback) {
+		blindUp : function(speed, callback) {
 			return this.hide('blind', { direction: 'vertical' }, speed, callback); 
 		},
-		BlindRight : function(speed, callback) {
+		blindRight : function(speed, callback) {
 			return this.show('blind', { direction: 'horizontal' }, speed, callback); 
 		},
-		BlindLeft : function(speed, callback) {
+		blindLeft : function(speed, callback) {
 			this.hide('blind', { direction: 'horizontal' }, speed, callback); 
 			return this;
 		},
-		DropOut : function(speed, callback) {
+		dropOut : function(speed, callback) {
 			return this.hide('drop', {direction: 'down' }, speed, callback); 
 		},
-		DropIn : function(speed, callback) {
+		dropIn : function(speed, callback) {
 			return this.show('drop', { direction: 'up' }, speed, callback); 
 		},
-		Fade : function(speed, callback) {
+		fade : function(speed, callback) {
 			return this.fadeOut(speed, callback);
 		},
-		Fold : function(speed, callback) {
+		fadeToggle = function(speed, callback) {
+			return this.animate({opacity: 'toggle'}, speed, callback);
+		},
+		fold : function(speed, callback) {
 			return this.hide('fold', {}, speed, callback); 
 		},
-		FoldOut : function(speed, callback) {
+		foldOut : function(speed, callback) {
 			return this.show('fold', {}, speed, callback); 
 		},
-		Grow : function(speed, callback) {
+		grow : function(speed, callback) {
 			return this.show('scale', {}, speed, callback); 
 		},
-		Highlight : function(speed, callback) {
+		highlight : function(speed, callback) {
 			return this.show('highlight', {}, speed, callback); 
 		},
-		Puff : function(speed, callback) {
+		puff : function(speed, callback) {
 			return this.hide('puff', {}, speed, callback); 
 		},
-		Pulsate : function(speed, callback) {
+		pulsate : function(speed, callback) {
 			return this.show('pulsate', {}, speed, callback); 
 		},
-		Shake : function(speed, callback) {
+		shake : function(speed, callback) {
 			return this.show('shake', {}, speed, callback); 
 		},
-		Shrink : function(speed, callback) {
+		shrink : function(speed, callback) {
 			return this.hide('scale', {}, speed, callback); 
 		},
-		Squish : function(speed, callback) {
+		squish : function(speed, callback) {
 			return this.hide('scale', { origin: ['top', 'left'] }, speed, callback); 
 		},
-		SlideUp : function(speed, callback) {
+		slideUp : function(speed, callback) {
 			return this.hide('slide', { direction: 'up'}, speed, callback); 
 		},
-		SlideDown : function(speed, callback) {
+		slideDown : function(speed, callback) {
 			return this.show('slide', { direction: 'up'}, speed, callback); 
 		},
-		SwitchOff : function(speed, callback) {
+		switchOff : function(speed, callback) {
 			return this.hide('clip', {}, speed, callback); 
 		},
-		SwitchOn : function(speed, callback) {
+		switchOn : function(speed, callback) {
 			return this.show('clip', {}, speed, callback); 
 		}
 	});
