@@ -168,10 +168,10 @@ module ActionView
 			end
 
 			def build_insertion(insertion)
-				insertion ||= 'html'
+				insertion = insertion ? insertion.to_s.downcase : 'html'
 				insertion = 'append' if insertion == 'bottom'
 				insertion = 'prepend' if insertion == 'top'
-				insertion.downcase
+				insertion
 			end
 
 			def build_observer(klass, name, options = {})
