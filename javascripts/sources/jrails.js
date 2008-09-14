@@ -20,8 +20,9 @@
 * 
 */
 
-// reset a form
+
 (function($) {
+	// reset a form
 	$.fn.reset = function() {
 		return this.each(function() {
 			// guard against an input with the name of 'reset'
@@ -30,6 +31,19 @@
 				this.reset();
 		});
 	};
+	// enable a form element
+	$.fn.enable = function() { 
+		return this.each(function() { 
+			this.disabled = false; 
+		});
+	};
+	// disable a form element
+	$.fn.disable = function() { 
+		return this.each(function() { 
+			this.disabled = true; 
+		});
+	};
+
 })(jQuery);
 
 /*
