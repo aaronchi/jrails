@@ -367,7 +367,7 @@ module ActionView
 				options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
 				options[:update] = options.delete(:onUpdate) if options[:onUpdate]
 				
-				[:items, :axis, :handle, :containment].each do |option|
+				[:axis, :cancel, :containment, :cursor, :handle, :tolerance, :items, :placeholder].each do |option|
 					options[option] = "'#{options[option]}'" if options[option]
 				end
 				
@@ -393,7 +393,9 @@ module ActionView
 				options.delete_if { |key, value| PrototypeHelper::AJAX_OPTIONS.include?(key) }
 
 				options[:accept] = array_or_string_for_javascript(options[:accept]) if options[:accept]    
-				options[:hoverClass] = "'#{options[:hoverClass]}'" if options[:hoverClass]
+				[:activeClass, :hoverClass, :tolerance].each do |option|
+					options[option] = "'#{options[option]}'" if options[option]
+				end
 				
 				%(#{JQUERY_VAR}('#{jquery_id(element_id)}').droppable(#{options_for_javascript(options)});)
 			end
