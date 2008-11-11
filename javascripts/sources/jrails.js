@@ -3,7 +3,7 @@
 * jRails ajax extras
 * version 0.1
 * <aaron@ennerchi.com> | http://www.ennerchi.com
-* 
+*
 */
 
 (function($) {
@@ -17,7 +17,7 @@
 *
 * jRails form extras
 * <aaron@ennerchi.com> | http://www.ennerchi.com
-* 
+*
 */
 
 
@@ -32,15 +32,15 @@
 		});
 	};
 	// enable a form element
-	$.fn.enable = function() { 
-		return this.each(function() { 
-			this.disabled = false; 
+	$.fn.enable = function() {
+		return this.each(function() {
+			this.disabled = false;
 		});
 	};
 	// disable a form element
-	$.fn.disable = function() { 
-		return this.each(function() { 
-			this.disabled = true; 
+	$.fn.disable = function() {
+		return this.each(function() {
+			this.disabled = true;
 		});
 	};
 
@@ -51,7 +51,7 @@
 * jRails form observer plugin
 * version 0.2
 * <aaron@ennerchi.com> | http://www.ennerchi.com
-* 
+*
 */
 
 (function($) {
@@ -70,7 +70,7 @@
 			if (typeof window.delayedObserverCallback == 'undefined') {
 				window.delayedObserverCallback = function(stackPos) {
 					observed = window.delayedObserverStack[stackPos];
-					if (observed.timer) clearTimeout(observed.timer);   
+					if (observed.timer) clearTimeout(observed.timer);
 					observed.timer = setTimeout(function(){
 						observed.timer = null;
 						observed.callback(observed.obj, observed.obj.formVal());
@@ -79,23 +79,23 @@
 				}
 			}
 			window.delayedObserverStack.push({
-				obj: el, timer: null, delay: delay, 
+				obj: el, timer: null, delay: delay,
 				oldVal: el.formVal(), callback: callback
-			});     
+			});
 			var stackPos = window.delayedObserverStack.length-1;
 			if (el[0].tagName == 'FORM') {
 				$(':input', el).each(function(){
 					var field = $(this);
 					field.bind($.fieldEvent(field, delay), function(){
 						observed = window.delayedObserverStack[stackPos];
-						if (observed.obj.formVal() == observed.obj.oldVal) return;
+						if (observed.obj.formVal() == observed.oldVal) return;
 						else window.delayedObserverCallback(stackPos);
 					});
 				});
 			} else {
 				el.bind($.fieldEvent(el, delay), function(){
 					observed = window.delayedObserverStack[stackPos];
-					if (observed.obj.formVal() == observed.obj.oldVal) return;
+					if (observed.obj.formVal() == observed.oldVal) return;
 					else window.delayedObserverCallback(stackPos);
 				});
 			};
@@ -103,7 +103,7 @@
 		formVal: function() { // Gets form values
 			var el = this[0];
 			if(el.tagName == 'FORM') return this.serialize();
-			if(el.type == 'checkbox' || self.type == 'radio') return this.filter('input:checked').val() || '';
+			if(el.type == 'checkbox' || el.type == 'radio') return this.filter('input:checked').val() || '';
 			else return this.val();
 		}
 	});
@@ -114,7 +114,7 @@
 * jRails visual effects stubs
 * version 0.2
 * <aaron@ennerchi.com> | http://www.ennerchi.com
-* 
+*
 */
 
 (function($) {
@@ -130,20 +130,20 @@
 			return this.show('blind', { direction: 'vertical' }, speed, callback);
 		},
 		blindUp : function(speed, callback) {
-			return this.hide('blind', { direction: 'vertical' }, speed, callback); 
+			return this.hide('blind', { direction: 'vertical' }, speed, callback);
 		},
 		blindRight : function(speed, callback) {
-			return this.show('blind', { direction: 'horizontal' }, speed, callback); 
+			return this.show('blind', { direction: 'horizontal' }, speed, callback);
 		},
 		blindLeft : function(speed, callback) {
-			this.hide('blind', { direction: 'horizontal' }, speed, callback); 
+			this.hide('blind', { direction: 'horizontal' }, speed, callback);
 			return this;
 		},
 		dropOut : function(speed, callback) {
-			return this.hide('drop', {direction: 'down' }, speed, callback); 
+			return this.hide('drop', {direction: 'down' }, speed, callback);
 		},
 		dropIn : function(speed, callback) {
-			return this.show('drop', { direction: 'up' }, speed, callback); 
+			return this.show('drop', { direction: 'up' }, speed, callback);
 		},
 		fade : function(speed, callback) {
 			return this.fadeOut(speed, callback);
@@ -152,43 +152,43 @@
 			return this.animate({opacity: 'toggle'}, speed, callback);
 		},
 		fold : function(speed, callback) {
-			return this.hide('fold', {}, speed, callback); 
+			return this.hide('fold', {}, speed, callback);
 		},
 		foldOut : function(speed, callback) {
-			return this.show('fold', {}, speed, callback); 
+			return this.show('fold', {}, speed, callback);
 		},
 		grow : function(speed, callback) {
-			return this.show('scale', {}, speed, callback); 
+			return this.show('scale', {}, speed, callback);
 		},
 		highlight : function(speed, callback) {
-			return this.show('highlight', {}, speed, callback); 
+			return this.show('highlight', {}, speed, callback);
 		},
 		puff : function(speed, callback) {
-			return this.hide('puff', {}, speed, callback); 
+			return this.hide('puff', {}, speed, callback);
 		},
 		pulsate : function(speed, callback) {
-			return this.show('pulsate', {}, speed, callback); 
+			return this.show('pulsate', {}, speed, callback);
 		},
 		shake : function(speed, callback) {
-			return this.show('shake', {}, speed, callback); 
+			return this.show('shake', {}, speed, callback);
 		},
 		shrink : function(speed, callback) {
-			return this.hide('scale', {}, speed, callback); 
+			return this.hide('scale', {}, speed, callback);
 		},
 		squish : function(speed, callback) {
-			return this.hide('scale', { origin: ['top', 'left'] }, speed, callback); 
+			return this.hide('scale', { origin: ['top', 'left'] }, speed, callback);
 		},
 		slideUp : function(speed, callback) {
-			return this.hide('slide', { direction: 'up'}, speed, callback); 
+			return this.hide('slide', { direction: 'up'}, speed, callback);
 		},
 		slideDown : function(speed, callback) {
-			return this.show('slide', { direction: 'up'}, speed, callback); 
+			return this.show('slide', { direction: 'up'}, speed, callback);
 		},
 		switchOff : function(speed, callback) {
-			return this.hide('clip', {}, speed, callback); 
+			return this.hide('clip', {}, speed, callback);
 		},
 		switchOn : function(speed, callback) {
-			return this.show('clip', {}, speed, callback); 
+			return this.show('clip', {}, speed, callback);
 		}
 	});
 })(jQuery);
