@@ -69,14 +69,14 @@
 			if (typeof window.delayedObserverStack == 'undefined') window.delayedObserverStack = [];
 			if (typeof window.delayedObserverCallback == 'undefined') {
 				window.delayedObserverCallback = function(stackPos) {
-					observed = window.delayedObserverStack[stackPos];
+					var observed = window.delayedObserverStack[stackPos];
 					if (observed.timer) clearTimeout(observed.timer);
 					observed.timer = setTimeout(function(){
 						observed.timer = null;
 						observed.callback(observed.obj, observed.obj.formVal());
 					}, observed.delay * 1000);
 					observed.oldVal = observed.obj.formVal();
-				}
+				};
 			}
 			window.delayedObserverStack.push({
 				obj: el, timer: null, delay: delay,
@@ -87,14 +87,14 @@
 				$(':input', el).each(function(){
 					var field = $(this);
 					field.bind($.fieldEvent(field, delay), function(){
-						observed = window.delayedObserverStack[stackPos];
+						var observed = window.delayedObserverStack[stackPos];
 						if (observed.obj.formVal() == observed.oldVal) return;
 						else window.delayedObserverCallback(stackPos);
 					});
 				});
 			} else {
 				el.bind($.fieldEvent(el, delay), function(){
-					observed = window.delayedObserverStack[stackPos];
+					var observed = window.delayedObserverStack[stackPos];
 					if (observed.obj.formVal() == observed.oldVal) return;
 					else window.delayedObserverCallback(stackPos);
 				});
