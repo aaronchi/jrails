@@ -133,6 +133,7 @@ module ActionView
 					js_options['data'] = options[:with].gsub("Form.serialize(this.form)","#{JQUERY_VAR}.param(#{JQUERY_VAR}(this.form).serializeArray())")
 				end
 				
+				js_options['type'] ||= "'post'"
 				if options[:method]
 					if method_option_to_s(options[:method]) == "'put'" || method_option_to_s(options[:method]) == "'delete'"
 						js_options['type'] = "'post'"
@@ -359,7 +360,6 @@ module ActionView
 				options.delete(:ghosting)
 				
 				if options[:onUpdate] || options[:url]
-					options[:method] ||= "post"
 					options[:with] ||= "#{JQUERY_VAR}(this).sortable('serialize',{key:'#{element_id}'})"
 					options[:onUpdate] ||= "function(){" + remote_function(options) + "}"
 				end
