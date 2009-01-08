@@ -7,9 +7,7 @@
 */
 
 (function($) {
-	$().ajaxSend(function(a, xhr, s){ //Set request headers globally
-		xhr.setRequestHeader("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
-	});
+	$.ajaxSettings.accepts._default = "text/javascript, text/html, application/xml, text/xml, */*";
 })(jQuery);
 
 
