@@ -350,9 +350,9 @@ module ActionView
         options[:dropOnEmpty] = false unless options[:dropOnEmpty]
         options[:helper] = "'clone'" if options[:ghosting] == true
         options[:axis] = case options.delete(:constraint)
-          when "vertical"
+          when "vertical", :vertical
             "y"
-          when "horizontal"
+          when "horizontal", :horizontal
             "x"
           when false
             nil
