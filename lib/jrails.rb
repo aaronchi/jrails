@@ -36,6 +36,8 @@ module ActionView
           
       unless const_defined? :JQCALLBACKS
         JQCALLBACKS = Set.new([ :beforeSend, :complete, :error, :success ] + (100..599).to_a)
+        #instance_eval { remove_const :AJAX_OPTIONS }
+        remove_const(:AJAX_OPTIONS) if const_defined?(:AJAX_OPTIONS)
         AJAX_OPTIONS = Set.new([ :before, :after, :condition, :url,
                          :asynchronous, :method, :insertion, :position,
                          :form, :with, :update, :script ]).merge(JQCALLBACKS)
@@ -226,7 +228,7 @@ module ActionView
     class JavaScriptElementProxy < JavaScriptProxy #:nodoc:
       
       unless const_defined? :JQUERY_VAR
-        JQUERY_VAR = ActionView::Helpers::PrototypeHelper::JQUERY_VAR
+        JQUERY_VAR = PrototypeHelper::JQUERY_VAR
       end
       
       def initialize(generator, id)
@@ -260,7 +262,7 @@ module ActionView
     class JavaScriptElementCollectionProxy < JavaScriptCollectionProxy #:nodoc:\
       
       unless const_defined? :JQUERY_VAR
-        JQUERY_VAR = ActionView::Helpers::PrototypeHelper::JQUERY_VAR
+        JQUERY_VAR = PrototypeHelper::JQUERY_VAR
       end
       
       def initialize(generator, pattern)
@@ -271,7 +273,7 @@ module ActionView
     module ScriptaculousHelper
       
       unless const_defined? :JQUERY_VAR
-        JQUERY_VAR = ActionView::Helpers::PrototypeHelper::JQUERY_VAR
+        JQUERY_VAR = PrototypeHelper::JQUERY_VAR
       end
       
       unless const_defined? :SCRIPTACULOUS_EFFECTS

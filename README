@@ -1,6 +1,8 @@
 = jRails
 
 jRails is a drop-in jQuery replacement for the Rails Prototype/script.aculo.us helpers.
+I (Patrick), modified the plugin to work as a gem and to support Ruby 1.9.X. All bugs
+are probably my fault, thanks to the original author.
 
 == Resources
 
