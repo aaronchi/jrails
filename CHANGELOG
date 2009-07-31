@@ -1,3 +1,14 @@
+0.4.1 (31 July 2009)
+* Gemification
+* Support for Ruby 1.9.X
+* Updated to jQuery 1.3.2
+* Updated to jQuery UI 1.7.2
+* Created a jrails binary (runs rake tasks) because rails does not (yet?) pickup
+tasks from gem plugins
+* Changed default to use jQuery compatibility name (not $)
+* Created a scrub task that will remove the prototype / script.aculo.us
+javascript files
+
 SVN
 * better approximate scriptaculous effect names
 * add support for page[:element_id].visual_effect(:effect) as well as page.visual_effect(:effect, :element_id)
