@@ -20,16 +20,13 @@ Gem::Specification.new do |s|
      "README.rdoc"
   ]
   s.files = [
-    "README.rdoc",
-     "VERSION.yml",
-     "bin/jrails",
+    "bin/jrails",
      "init.rb",
      "install.rb",
      "javascripts/jquery-ui.js",
      "javascripts/jquery.js",
      "javascripts/jrails.js",
      "javascripts/sources/jrails.js",
-     "jrails.gemspec",
      "lib/jrails.rb",
      "rails/init.rb",
      "tasks/jrails.rake"
