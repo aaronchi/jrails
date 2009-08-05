@@ -8,7 +8,7 @@ are probably my fault, thanks to the original author.
 
 Install
 
-* .script/plugin install http://ennerchi.googlecode.com/svn/trunk/plugins/jrails
+* .script/plugin install git://github.com/aaronchi/jrails.git
 
 Project Site
 

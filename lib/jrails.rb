@@ -199,10 +199,11 @@ module ActionView
       def build_callbacks(options)
         callbacks = {}
         options[:beforeSend] = '';
-        [:uninitialized,:loading,:loaded].each do |key|
+        [:uninitialized,:loading].each do |key|
           options[:beforeSend] << (options[key].last == ';' ? options.delete(key) : options.delete(key) << ';') if options[key]
         end
         options.delete(:beforeSend) if options[:beforeSend].blank?
+        options[:complete] = options.delete(:loaded) if options[:loaded] 
         options[:error] = options.delete(:failure) if options[:failure]
         if options[:update]
           if options[:update].is_a?(Hash)
@@ -317,7 +318,7 @@ module ActionView
           js_options = js_options.merge(effect[:options]) if effect[:options]
         end
         
-        [:color, :direction].each do |option|
+        [:color, :direction, :startcolor, :endcolor].each do |option|
           js_options[option] = "'#{js_options[option]}'" if js_options[option]
         end
         
