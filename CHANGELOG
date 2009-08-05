@@ -1,4 +1,4 @@
-0.4.1 (31 July 2009)
+0.5.0 (31 July 2009)
 * Gemification
 * Support for Ruby 1.9.X
 * Updated to jQuery 1.3.2
@@ -8,15 +8,12 @@ tasks from gem plugins
 * Changed default to use jQuery compatibility name (not $)
 * Created a scrub task that will remove the prototype / script.aculo.us
 javascript files
-
-SVN
 * better approximate scriptaculous effect names
 * add support for page[:element_id].visual_effect(:effect) as well as page.visual_effect(:effect, :element_id)
 * added a reset form function to jrails.js (stolen from jquery form)
 * can now use jquery selectors in all functions
 * added javascript_function helper to render inline rjs helpers
 * better support for sortable_element
-* updated to jquery-ui 1.5.1
 
 0.4.0 (16 June 2008)
 * updated to jquery-ui 1.5 & merged js into single file
