@@ -30,6 +30,8 @@ module ActionView
     
     module PrototypeHelper
       
+      USE_PROTECTION = const_defined?(:DISABLE_JQUERY_FORGERY_PROTECTION) ? !DISABLE_JQUERY_FORGERY_PROTECTION : true
+
       unless const_defined? :JQUERY_VAR
         JQUERY_VAR = '$'
       end
@@ -148,7 +150,7 @@ module ActionView
           end
         end
         
-        if respond_to?('protect_against_forgery?') && protect_against_forgery?
+        if USE_PROTECTION && respond_to?('protect_against_forgery?') && protect_against_forgery?
           if js_options['data']
             js_options['data'] << " + '&"
           else
