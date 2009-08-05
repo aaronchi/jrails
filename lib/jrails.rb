@@ -366,7 +366,13 @@ module ActionView
         options.delete(:ghosting)
         
         if options[:onUpdate] || options[:url]
-          options[:with] ||= "#{JQUERY_VAR}(this).sortable('serialize',{key:'#{element_id}[]'})"
+          if options[:format]
+            options[:with] ||= "#{JQUERY_VAR}(this).sortable('serialize',{key:'#{element_id}[]', expression:#{options[:format]}})"
+            options.delete(:format)
+          else
+            options[:with] ||= "#{JQUERY_VAR}(this).sortable('serialize',{key:'#{element_id}[]'})"
+          end
+          
           options[:onUpdate] ||= "function(){" + remote_function(options) + "}"
         end
         
