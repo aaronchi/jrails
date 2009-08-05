@@ -19,6 +19,21 @@ Gem::Specification.new do |s|
      "LICENSE",
      "README.rdoc"
   ]
+  s.files = [
+    "README.rdoc",
+     "VERSION.yml",
+     "bin/jrails",
+     "init.rb",
+     "install.rb",
+     "javascripts/jquery-ui.js",
+     "javascripts/jquery.js",
+     "javascripts/jrails.js",
+     "javascripts/sources/jrails.js",
+     "jrails.gemspec",
+     "lib/jrails.rb",
+     "rails/init.rb",
+     "tasks/jrails.rake"
+  ]
   s.homepage = %q{http://ennerchi.com/projects/jrails}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]

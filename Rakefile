@@ -11,6 +11,7 @@ begin
     gem.homepage = "http://ennerchi.com/projects/jrails"
     gem.authors = ["Aaron Eisenberger", "Patrick Hurley"]
     gem.rubyforge_project = "jrails"
+    gem.files =  FileList["[A-Z]*.*","{bin,javascripts,lib,rails,tasks}/**/*"]
   end
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
