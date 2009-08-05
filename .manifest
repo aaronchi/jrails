@@ -1,6 +1,6 @@
 CHANGELOG
-Manifest.txt
-README
+LICENSE
+README.rdoc
 install.rb
 init.rb
 bin
