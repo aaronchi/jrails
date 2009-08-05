@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "jrails"
-  s.version = "0.5.0"
+  s.version = "0.5.1"
   s.date = "2009-07-31"
 
   s.summary = "jRails is a drop-in jQuery replacement for the Rails Prototype/script.aculo.us helpers."
