@@ -2,9 +2,9 @@ require 'rubygems'
 
 spec = Gem::Specification.new do |s|
   s.name = "jrails"
-  s.version = "0.4.1"
-  s.authors = ["aaronchi", "Patrick Hurley"]
-  s.email = "phurley@gmail.com"
+  s.version = "0.5.0"
+  s.authors = ["Aaron Eisenberger", "Patrick Hurley"]
+  s.email = "aaronchi@gmail.com"
   s.homepage = "http://ennerchi.com/projects/jrails"
   s.platform = Gem::Platform::RUBY
   s.summary = "jRails is a drop-in jQuery replacement for the Rails Prototype/script.aculo.us helpers."
