@@ -117,7 +117,7 @@
 
 (function($) {
 	$.fn.extend({
-		visualEffect : function(o) {
+		visualEffect : function(o, options) {
 			if (options) {
         speed = options.duration * 1000;
       } else {
