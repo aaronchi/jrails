@@ -33,7 +33,7 @@ module ActionView
       USE_PROTECTION = const_defined?(:DISABLE_JQUERY_FORGERY_PROTECTION) ? !DISABLE_JQUERY_FORGERY_PROTECTION : true
 
       unless const_defined? :JQUERY_VAR
-        JQUERY_VAR = '$'
+        JQUERY_VAR = 'jQuery'
       end
           
       unless const_defined? :JQCALLBACKS

@@ -14,21 +14,15 @@ task :help do
   rakeapp.display_tasks_and_comments
 end
 
-desc "Copies the jQuery and jRails javascripts to public/javascripts"
-task :update do 
-  Rake::Task['jrails:update:javascripts'].invoke
-end
-
 desc 'Installs the jQuery and jRails javascripts to public/javascripts'
 task :install do
-  Rake::Task['jrails:update:javascripts'].invoke
+  Rake::Task['jrails:js:install'].invoke
 end
 
 desc 'Remove the prototype / script.aculo.us javascript files'
 task :scrub do
-  Rake::Task['jrails:update:scrub'].invoke
+  Rake::Task['jrails:js:scrub'].invoke
 end
-
 
 rakeapp.init("jrails")
 task :default => [:help]
