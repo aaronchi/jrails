@@ -3,19 +3,10 @@
 #
 #   From http://pastie.org/303776
 #
-# 1. Add this code to THE BEGINNING OF your test_helper.rb 
-#
-#   (I actually just added ...
-#
-#      $:.unshift "#{RAILS_ROOT}/test/"
-#      require "jquery_selector_assertions"
-#
-#   to the beginning of my test/test_helper.rb)
-#
-# 2. Make sure to use '#' prefix when referring to element IDs in assert_select_rjs(),
+# 1. Make sure to use '#' prefix when referring to element IDs in assert_select_rjs(),
 #    like this:
 #            assert_select_rjs :replace_html, '#someid'
-#    instead of standard convention:
+#    instead of prototype convention:
 #             assert_select_rjs :replace_html, 'someid' 
 #
 # We monkey-patch some RJS-matching constants for assert_select_rjs to work 
@@ -28,8 +19,6 @@ module ActionController
             RJS_PATTERN_HTML  = "\"((\\\\\"|[^\"])*)\""
 #            RJS_ANY_ID      = "\"([^\"])*\""
 #	better match with single or double quoted ids
-#            RJS_ANY_ID      = "[\"']{1}([^\"])*[\"']{1}"
-#	actually, the {1}'s aren't necessary!
             RJS_ANY_ID      = "[\"']([^\"])*[\"']"
             
             RJS_STATEMENTS   = {
